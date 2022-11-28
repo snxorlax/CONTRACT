@@ -559,6 +559,7 @@ public class PlayerManager : NetworkBehaviour
                 playerDeck.Remove(card.GetComponent<CardDisplay>().cardCatalogue.CardList[num]);
                 UpdateDeckCount();
                 enemyHand.Add(card);
+                card.GetComponent<AnimateCard>().DrawEnemyCard();
                 this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.handOffset);
             }
             else if (action == "Play")

@@ -2595,9 +2595,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   cardEffectIndicator: {fileID: 0}
   front: {fileID: 0}
+  back: {fileID: 0}
   cardAnimator: {fileID: 0}
   cardIndicatorAnimator: {fileID: 0}
-  drawClip: {fileID: 7400000, guid: 97a1871e1400d0941868784148c36f10, type: 2}
+  drawClipPlayer: {fileID: 7400000, guid: 97a1871e1400d0941868784148c36f10, type: 2}
+  drawClipEnemy: {fileID: 7400000, guid: 15bde13d303ce034e857f0deb72e9c55, type: 2}
 --- !u!1 &633753883383563906
 GameObject:
   m_ObjectHideFlags: 0
