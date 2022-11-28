@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: 07_GoonEnforcer
+  m_EditorClassIdentifier: 
+  cardNo: 7
+  cardType: 0
+  artColor: {r: 0.96862745, g: 0.98039216, b: 0.7529412, a: 1}
+  attack: 1
+  originalAttack: 1
+  health: 3
+  originalHealth: 3
+  bounty: 3
+  currentZone: 
+  shroud: 0
+  cardName: GOON ENFORCER
+  cardText: 'Accomplice: Goon Enforcer Gains +3/+2.                                  
+    Turn Start: Heal 1.'
+  cardEffect: {fileID: 11400000, guid: bd09d55b3a6d2cf4cba7841ac2d8dec9, type: 2}
+  activatedEffectText: []
+  deathWalkText: 
+  deathWalk: 0
+  creations: []

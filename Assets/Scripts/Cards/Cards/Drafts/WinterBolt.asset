@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: WinterBolt
+  m_EditorClassIdentifier: 
+  cardType: 2
+  cardArt: {fileID: 21300000, guid: c9660f75106f07d4bb7a34d170ba9644, type: 3}
+  cardArtBackground: {fileID: 21300000, guid: 02d3a7e6a7e782743bafdbc088d3f409, type: 3}
+  artColor: {r: 0.3764706, g: 0.3764706, b: 0.3764706, a: 1}
+  artBackgroundColor: {r: 0.25490198, g: 0.21568628, b: 0.12941177, a: 0.59607846}
+  cardBackground: {r: 0, g: 0, b: 0, a: 1}
+  attack: 0
+  health: 0
+  currentZone: Hand

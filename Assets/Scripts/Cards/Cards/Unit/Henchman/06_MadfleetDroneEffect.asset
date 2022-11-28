@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 94363643a7d1b124991a4bcd91254b36, type: 3}
+  m_Name: 06_MadfleetDroneEffect
+  m_EditorClassIdentifier: 
+  gameManager: {fileID: 0}
+  player: {fileID: 0}
+  enemy: {fileID: 0}
+  enemyField: {fileID: 0}
+  playerField: {fileID: 0}
+  enemyAvatar: {fileID: 0}
+  self: {fileID: 0}
+  currentEffect: 0
+  gameMessage: 
+  contractInfo: []

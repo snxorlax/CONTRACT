@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: WitherknotBlossom
+  m_EditorClassIdentifier: 
+  contracts: []
+  cardType: 1
+  cardArt: {fileID: 21300000, guid: a7179b527c22a40448df21e06a75b86f, type: 3}
+  artColor: {r: 0.35686275, g: 0.19215687, b: 0.09019608, a: 1}
+  frameOuter: {r: 0.23529412, g: 0.18431373, b: 0.019607844, a: 1}
+  frameMain: {r: 0.08627451, g: 0.08627451, b: 0.08627451, a: 1}
+  frameInner: {r: 0.39607844, g: 0.2901961, b: 0.003921569, a: 1}
+  frameShadow: {r: 0.28235295, g: 0.20784314, b: 0, a: 1}
+  attack: 0
+  health: 0
+  currentZone: 
+  shroud: 0
+  cardName: WITHERKNOT BLOSSOM
+  cardText: Restore a unit from your Graveyard. It is poisoned, and is destroyed
+    when Witherknot Blossom is drestroyed.
+  cardEffect: {fileID: 11400000, guid: fd9d3d581d64fd94eaea413be79f665a, type: 2}

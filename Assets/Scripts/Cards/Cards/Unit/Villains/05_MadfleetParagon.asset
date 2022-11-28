@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: 05_MadfleetParagon
+  m_EditorClassIdentifier: 
+  cardNo: 5
+  cardType: 1
+  artColor: {r: 0.34117648, g: 0.49411765, b: 0.5019608, a: 1}
+  attack: 4
+  health: 1
+  originalHealth: 1
+  bounty: 4
+  currentZone: 
+  shroud: 0
+  cardName: MADFLEET PARAGON
+  cardText: 'Contract: Betray 1.                                                Deathwalk:
+    Create a *Madfleet Drone*.'
+  cardEffect: {fileID: 11400000, guid: c110e571d2665d34984b92b1692f0625, type: 2}
+  activatedEffectText: []
+  deathWalkText: Create a *MadFleet Drone*.
+  deathWalk: 1
+  creations:
+  - {fileID: 11400000, guid: 510615bd1fcc37d40b7191e02a4785b5, type: 2}

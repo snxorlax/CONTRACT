@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: SnowDemon
+  m_EditorClassIdentifier: 
+  contracts:
+  - keyword: 0
+    amount: 2
+  cardType: 0
+  cardArt: {fileID: 21300000, guid: 51673a81538123b4da3cf615ff5ba733, type: 3}
+  cardArtBackground: {fileID: 21300000, guid: 02d3a7e6a7e782743bafdbc088d3f409, type: 3}
+  artColor: {r: 0.3764706, g: 0.3764706, b: 0.3764706, a: 1}
+  artBackgroundColor: {r: 0.25490198, g: 0.21568628, b: 0.12941177, a: 0.59607846}
+  cardBackground: {r: 0, g: 0, b: 0, a: 1}
+  borderColor: {r: 0, g: 0, b: 0, a: 0}
+  attack: 1
+  health: 2
+  currentZone: Hand
+  shroud: 0
+  cardName: 
+  cardText: 

@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: 01_MadFleetScout
+  m_EditorClassIdentifier: 
+  cardNo: 1
+  cardType: 0
+  artColor: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 1}
+  attack: 2
+  originalAttack: 2
+  health: 2
+  originalHealth: 2
+  bounty: 2
+  currentZone: 
+  shroud: 0
+  cardName: MADFLEET SCOUT
+  cardText: 'Fleet: Gain +2/+2                                       Deathwalk: Draw
+    1.'
+  cardEffect: {fileID: 11400000, guid: f72ead20e6aa7eb47b91d7cd5ac98c47, type: 2}
+  activatedEffectText: []
+  deathWalkText: 'DeathWalk:                                   Draw 1.'
+  deathWalk: 1
+  creations: []

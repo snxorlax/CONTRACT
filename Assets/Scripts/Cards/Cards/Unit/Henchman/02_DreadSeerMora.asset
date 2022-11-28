@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: 02_DreadSeerMora
+  m_EditorClassIdentifier: 
+  cardNo: 2
+  cardType: 0
+  artColor: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 1}
+  attack: 1
+  originalAttack: 1
+  health: 1
+  originalHealth: 1
+  bounty: 1
+  currentZone: 
+  shroud: 0
+  cardName: DREAD SEER, MORA
+  cardText: 'Shroud: Create a *Dream Vial*.'
+  cardEffect: {fileID: 11400000, guid: 0bffc9f800f732047a0af39507946be9, type: 2}
+  activatedEffectText: []
+  deathWalkText: 
+  deathWalk: 0
+  creations:
+  - {fileID: 11400000, guid: 444ec94d05d9cd746859389ffe8323d5, type: 2}

@@ -1,0 +1,30 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: MoonSon
+  m_EditorClassIdentifier: 
+  contracts:
+  - keyword: 1
+    amount: 3
+  cardType: 0
+  cardArt: {fileID: 21300000, guid: 3afb05bf06c870948800096e56e6a5e3, type: 3}
+  cardArtBackground: {fileID: 21300000, guid: e7967725bb0bca54cb735647de73c143, type: 3}
+  artColor: {r: 0.4627451, g: 0.22352941, b: 0.22352941, a: 1}
+  artBackgroundColor: {r: 0.27450982, g: 0, b: 0.023529412, a: 0.59607846}
+  cardBackground: {r: 0, g: 0, b: 0, a: 1}
+  borderColor: {r: 0, g: 0, b: 0, a: 0}
+  attack: 3
+  health: 5
+  currentZone: Hand
+  shroud: 0
+  cardName: 
+  cardText: 

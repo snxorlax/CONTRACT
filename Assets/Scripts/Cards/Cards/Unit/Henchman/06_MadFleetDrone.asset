@@ -1,0 +1,31 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9f383f5adb0e3f0479fa20d98bca2f2a, type: 3}
+  m_Name: 06_MadFleetDrone
+  m_EditorClassIdentifier: 
+  cardNo: 6
+  cardType: 0
+  artColor: {r: 0.29411766, g: 0.29411766, b: 0.29411766, a: 1}
+  attack: 2
+  originalAttack: 2
+  health: 2
+  originalHealth: 2
+  bounty: 1
+  currentZone: 
+  shroud: 0
+  cardName: 
+  cardText: 
+  cardEffect: {fileID: 11400000, guid: 7586affea1e38d14ab81a87e461b0dfb, type: 2}
+  activatedEffectText: []
+  deathWalkText: 
+  deathWalk: 0
+  creations: []
