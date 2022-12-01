@@ -4,9 +4,11 @@ using UnityEngine;
 
 public class AnimateCard : MonoBehaviour
 {
-    public Transform cardEffectIndicator, front, back;
+    public Transform cardEffectIndicator, front, back, mainBoard;
+    
     public Animator cardAnimator, cardIndicatorAnimator;
-    public AnimationClip drawClipPlayer, drawClipEnemy;
+    public AnimationClip drawClipPlayer, drawClipEnemy, playClipEnemy;
+    public Canvas canvas;
 
     private void Awake()
     {
@@ -16,12 +18,9 @@ public class AnimateCard : MonoBehaviour
         cardEffectIndicator = GameObject.Find("CurrentCardIndicator").transform;
         
         cardIndicatorAnimator = cardEffectIndicator.GetComponent<Animator>();
+        mainBoard = GameObject.Find("MainBoard").transform;
+        canvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
         
-    }
-    public void PlayEnemyCard()
-    {
-        cardAnimator.enabled = true;
-        cardAnimator.Play("Base Layer.PlayCard_Enemy", -1, 0);
     }
     public void DrawPlayerCard()
     {
@@ -85,5 +84,54 @@ public class AnimateCard : MonoBehaviour
         }
         front.gameObject.SetActive(true);
     }
-
+    public void StartPlayerPlay(){
+        StartCoroutine(AnimatePlayerPlay());
+    }
+    public IEnumerator AnimatePlayerPlay(){
+        while (Vector2.Distance(front.position, mainBoard.position)> .01f)
+        {
+            front.localScale = Vector3.Lerp(front.localScale, new Vector3(2.3f,2.3f,2.3f), .3f);
+            front.position = Vector2.Lerp(front.position, mainBoard.position, .1f);
+            yield return null;
+        }
+        Invoke("CompletePlayerPlay", .8f);
+    }
+    public void CompletePlayerPlay()
+    {
+        StartCoroutine(CompleteAnimatePlayerPlay());
+    }
+    public IEnumerator CompleteAnimatePlayerPlay(){
+        while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
+        {
+            front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
+            front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
+            yield return null;
+        }
+        StopAllCoroutines();
+    }
+    public void PlayEnemyCard()
+    {
+        front.gameObject.SetActive(false);
+        back.gameObject.SetActive(false);
+        cardEffectIndicator.GetComponent<CardDisplay>().card = GetComponent<CardDisplay>().card;
+        cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
+        cardIndicatorAnimator.Play("Base Layer.PlayCard_Enemy", -1, 0);
+        Invoke("CompleteEnemyPlay", playClipEnemy.length);
+    }
+    public void CompleteEnemyPlay()
+    {
+        front.gameObject.SetActive(true);
+        front.localScale = cardEffectIndicator.transform.Find("Front").localScale;
+        transform.rotation = Quaternion.identity;
+        front.position = cardEffectIndicator.position;
+        StartCoroutine(CompleteEnemyPlayAnimation());
+    }
+    public IEnumerator CompleteEnemyPlayAnimation(){
+        while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
+        {
+            front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
+            front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
+            yield return null;
+        }
+    }
 }

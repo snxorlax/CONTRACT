@@ -12,8 +12,8 @@ public class MadfleetParagonEffect : CardEffect
         foreach (Transform t in playerField.transform)
         {
 
-                    t.Find("Indicator").GetComponent<Image>().enabled = true;
-                    t.GetComponent<CardBehaviour>().contractSelectable = true;
+            t.Find("Indicator").GetComponent<Image>().enabled = true;
+            t.GetComponent<CardBehaviour>().contractSelectable = true;
         }
         gameManager.DisableZone(gameManager.playerManager.playerHandArea);
         gameManager.DisableZone(gameManager.playerManager.playerUtilityArea);
@@ -29,8 +29,8 @@ public class MadfleetParagonEffect : CardEffect
         foreach (Transform t in playerField.transform)
         {
 
-                    t.Find("Indicator").GetComponent<Image>().enabled = false;
-                    t.GetComponent<CardBehaviour>().contractSelectable = false;
+            t.Find("Indicator").GetComponent<Image>().enabled = false;
+            t.GetComponent<CardBehaviour>().contractSelectable = false;
         }
         player.currentContract.Remove(self);
         gameManager.EnableZone(gameManager.playerManager.playerHandArea);

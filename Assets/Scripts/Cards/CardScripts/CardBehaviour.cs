@@ -185,20 +185,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             //Check if it is your turn, the card belongs to you, and the card is in your hand.
             if (playerManager.isTurn && hasAuthority && card.currentZone == "Hand")
             {
-                if (card.cardType == Card.CardType.Villain)
-                {
-                    playerManager.playerFieldIndicator.GetComponent<Image>().enabled = true;
-                }
-                //Check if the card is a henchman and player has not yet summoned.
-                if (card.cardType == Card.CardType.Henchman && playerManager.hasSummon)
-                {
-                    playerManager.playerFieldIndicator.GetComponent<Image>().enabled = true;
-                }
-                //If card is relic or VA, then it will highlight the utility portion
-                else if (card.cardType == Card.CardType.VillainousArt || card.cardType == Card.CardType.Relic)
-                {
-                    playerManager.playerUtilityIndicator.GetComponent<Image>().enabled = true;
-                }
                 //Move the dragged card along with mouse according to canvas scale
                 rectTransform.anchoredPosition += pointerEventData.delta / canvas.scaleFactor;
             }
@@ -273,7 +259,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     {
                         if (pointerEventData.button == PointerEventData.InputButton.Right)
                         {
-                            playerManager.PlayCard(this.gameObject, true);
+                            playerManager.PlayCard(gameObject, true);
                         }
                         else
                         {
@@ -281,7 +267,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                             {
                                 playerManager.currentEffect.Add(gameObject);
                             }
-                            playerManager.PlayCard(this.gameObject, false);
+                            playerManager.PlayCard(gameObject, false);
                         }
                     }
 
@@ -299,8 +285,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             }
             playerDisplay.DisplayHorizontal(playerManager.playerHand, Display.handOffset);
             transform.localScale = originalScale;
-            playerManager.playerFieldIndicator.GetComponent<Image>().enabled = false;
-            playerManager.playerUtilityIndicator.GetComponent<Image>().enabled = false;
             if (playerManager.currentEffect.Count == 0)
             {
                 foreach (Transform child in enemyField.transform)
@@ -321,24 +305,31 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("PlayerField"))
+        //Refactor names. This is a draft.
+        if (other.gameObject.CompareTag("PlayZone"))
         {
-            isOverPlayZone = true;
-        }
-        if (other.gameObject.CompareTag("PlayerUtility"))
-        {
-            isOverUtility = true;
+            if (hasAuthority)
+            {
+                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = true;
+            }
+            if (card.cardType == Card.CardType.Villain || card.cardType == Card.CardType.Henchman)
+            {
+                isOverPlayZone = true;
+            }
+            if (card.cardType == Card.CardType.Relic || card.cardType == Card.CardType.VillainousArt)
+            {
+                isOverUtility = true;
+            }
+
         }
 
     }
     public void OnTriggerExit2D(Collider2D other)
     {
-        if (other.gameObject.CompareTag("PlayerField"))
+        if (other.gameObject.CompareTag("PlayZone"))
         {
+            GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
             isOverPlayZone = false;
-        }
-        if (other.gameObject.CompareTag("PlayerUtility"))
-        {
             isOverUtility = false;
         }
     }

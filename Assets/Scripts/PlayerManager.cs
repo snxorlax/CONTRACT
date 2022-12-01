@@ -161,7 +161,7 @@ public class PlayerManager : NetworkBehaviour
     public void StartTurn()
     {
         Debug.Log("StartTurn");
-        openingDraw = false;
+        ActivateDrawAnimation();
         //reset blade counter
         blade = 0;
         foreach (GameObject g in playerField)
@@ -177,6 +177,21 @@ public class PlayerManager : NetworkBehaviour
                 }
             }
             
+        }
+    }
+    public void ActivateDrawAnimation(){
+        CmdActivateDrawAnimation();
+    }
+    [Command(requiresAuthority = false)]
+    public void CmdActivateDrawAnimation(){
+        RpcActivateDrawAnimation();
+    }
+    [ClientRpc]
+    public void RpcActivateDrawAnimation()
+    {
+        foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+        {
+            p.openingDraw = false;
         }
     }
     public void ChangeTurn()
@@ -387,6 +402,7 @@ public class PlayerManager : NetworkBehaviour
             }
             if (action == "Play")
             {
+                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
                 card.GetComponent<CardBehaviour>().SetCard();
                 card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
                 if (num == 0)
@@ -431,6 +447,7 @@ public class PlayerManager : NetworkBehaviour
                 }
                 playerHand.Remove(card);
                 this.GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
+                card.GetComponent<AnimateCard>().StartPlayerPlay();
             }
             if (action == "Destroy")
             {
@@ -560,16 +577,17 @@ public class PlayerManager : NetworkBehaviour
                 UpdateDeckCount();
                 enemyHand.Add(card);
                 card.GetComponent<AnimateCard>().DrawEnemyCard();
-                this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.handOffset);
+                this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.enemyHandOffset);
             }
             else if (action == "Play")
             {
+                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
                 card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
+                card.GetComponent<CardDisplay>().card.currentZone = "Field";
                 if (num != 1)
                 {
                     card.GetComponent<AnimateCard>().PlayEnemyCard();
                 }
-                card.GetComponent<CardDisplay>().card.currentZone = "Field";
                 switch (card.GetComponent<CardDisplay>().card.cardType)
                 {
                     case Card.CardType.Henchman:
@@ -593,7 +611,6 @@ public class PlayerManager : NetworkBehaviour
                         this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
                         break;
                 }
-                card.transform.Find("Back").gameObject.SetActive(false);
                 if (num == 1)
                 {
                     card.GetComponent<CardDisplay>().card.shroud = true;

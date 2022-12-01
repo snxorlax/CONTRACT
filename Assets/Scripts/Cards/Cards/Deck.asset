@@ -15,7 +15,6 @@ MonoBehaviour:
   mainDeck:
   - {fileID: 11400000, guid: c9b5a870ce847c04e8a555abee93cf1b, type: 2}
   - {fileID: 11400000, guid: c9b5a870ce847c04e8a555abee93cf1b, type: 2}
-  - {fileID: 11400000, guid: c9b5a870ce847c04e8a555abee93cf1b, type: 2}
   - {fileID: 11400000, guid: 4d14d3dffdbc8ec499fdbcb430f939f2, type: 2}
   - {fileID: 11400000, guid: 4d14d3dffdbc8ec499fdbcb430f939f2, type: 2}
   - {fileID: 11400000, guid: 4d14d3dffdbc8ec499fdbcb430f939f2, type: 2}

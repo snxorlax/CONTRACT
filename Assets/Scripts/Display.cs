@@ -5,11 +5,12 @@ using Mirror;
 
 public class Display : MonoBehaviour
 {
-    public static float handOffset, fieldOffset, discardOffset, centerVert;
+    public static float handOffset, enemyHandOffset, fieldOffset, discardOffset, centerVert;
 
     private void Awake()
     {
         handOffset = 5f;
+        enemyHandOffset = -55f;
         fieldOffset = 60f;
         discardOffset = 15f;
         centerVert = -1275f;
