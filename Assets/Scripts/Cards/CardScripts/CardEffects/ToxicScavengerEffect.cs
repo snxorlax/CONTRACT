@@ -22,6 +22,7 @@ public class ToxicScavengerEffect : CardEffect
     }
     public override void Deathwalk()
     {
+        TextMeshProUGUI gameText = player.gameText.GetComponent<TextMeshProUGUI>();
         self.GetComponent<CardBehaviour>().playerDiscard.transform.SetAsFirstSibling();
         player.currentEffect.Add(self);
         currentEffect = effect.Deathwalk;

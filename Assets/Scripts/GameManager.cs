@@ -343,4 +343,23 @@ public class GameManager : NetworkBehaviour
         cardIndicator.transform.GetChild(1).gameObject.SetActive(true);
         cardIndicatorAnimator.Play("Base Layer.cardeffectindicator", -1, 0);
     }
+    public int CaluculatePoison()
+    {
+        int poison = 0;
+        List<Card.CardType> cardTypes = new List<Card.CardType>();
+
+        foreach (PlayerManager p in players)
+        {
+            foreach (Transform t in p.enemyDiscardArea.transform)
+            {
+                Card.CardType currentType = t.GetComponent<CardDisplay>().card.cardType;
+                if (!cardTypes.Contains(currentType))
+                {
+                    cardTypes.Add(currentType);
+                }
+            }
+        }
+        poison = cardTypes.Count;
+        return poison;
+    }
 }
