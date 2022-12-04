@@ -12,6 +12,7 @@ public class PlayerEvent : UnityEvent<PlayerManager>{}
 public class CardEvent : UnityEvent<Card>{}
 public class ContinuousEvent : UnityEvent{}
 public class DamageEvent : UnityEvent<Card>{}
+public class GraveyardEvent: UnityEvent{}
 public class GameManager : NetworkBehaviour
 {
     public readonly SyncList<PlayerManager> players = new SyncList<PlayerManager>();
@@ -29,6 +30,7 @@ public class GameManager : NetworkBehaviour
     public PlayerEvent OnTurnStart = new PlayerEvent();
     public CardEvent OnPlay = new CardEvent();
     public ContinuousEvent UnitEvent = new ContinuousEvent();
+    public GraveyardEvent GraveyardUpdate = new GraveyardEvent();
 
 
     private void Start()
@@ -42,6 +44,8 @@ public class GameManager : NetworkBehaviour
         cardIndicatorAnimator = cardIndicator.GetComponent<Animator>();
         DelayStartGame();
         players.Callback += OnPlayersUpdated;
+        GraveyardUpdate.AddListener(UpdatePoison);
+        
     }
     public void OnPlayersUpdated(SyncList<PlayerManager>.Operation op, int index, PlayerManager oldPlayer, PlayerManager newPlayer)
     {
@@ -361,5 +365,26 @@ public class GameManager : NetworkBehaviour
         }
         poison = cardTypes.Count;
         return poison;
+    }
+    public void UpdatePoison(){
+
+    }
+    [Command]
+    public void CmdUpdatePoison(){
+        RpcUpdatePoison();
+    }
+    [ClientRpc]
+    public void RpcUpdatePoison()
+    {
+        foreach(PlayerManager p in players)
+        {
+            foreach (GameObject g in p.playerField)
+            {
+                int currentAttack = g.GetComponent<CardDisplay>().card.attack;
+                int originalHealth = g.GetComponent<CardDisplay>().card.originalAttack;
+                int currentPoison = CaluculatePoison();
+
+            }
+        }
     }
 }

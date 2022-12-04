@@ -402,7 +402,6 @@ public class PlayerManager : NetworkBehaviour
             }
             if (action == "Play")
             {
-                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
                 card.GetComponent<CardBehaviour>().SetCard();
                 card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
                 if (num == 0)
@@ -448,6 +447,7 @@ public class PlayerManager : NetworkBehaviour
                 playerHand.Remove(card);
                 this.GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
                 card.GetComponent<AnimateCard>().StartPlayerPlay();
+                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
             }
             if (action == "Destroy")
             {

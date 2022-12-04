@@ -20,7 +20,6 @@ public class MadfleetParagonEffect : CardEffect
     }
     public override void ContractEffect()
     {
-        base.ContractEffect();
         foreach (GameObject obj in player.selectedUnits)
         {
             player.DestroyCard(obj);
@@ -35,6 +34,7 @@ public class MadfleetParagonEffect : CardEffect
         player.currentContract.Remove(self);
         gameManager.EnableZone(gameManager.playerManager.playerHandArea);
         gameManager.EnableZone(gameManager.playerManager.playerUtilityArea);
+        base.ContractEffect();
     }
 
     public override void Deathwalk()

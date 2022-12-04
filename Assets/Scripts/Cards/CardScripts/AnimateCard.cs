@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class AnimateCard : MonoBehaviour
 {
@@ -108,6 +109,7 @@ public class AnimateCard : MonoBehaviour
             yield return null;
         }
         StopAllCoroutines();
+        GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
     }
     public void PlayEnemyCard()
     {
