@@ -48,17 +48,20 @@ public class CardDisplay : MonoBehaviour
             {
                 for (int i = 0; i < card.activatedEffectText.Count; i++)
                 {
-                    activatedEffects.Add(transform.Find("CardEffects").GetChild(0).gameObject);
-                    activatedEffects[i].transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = card.activatedEffectText[i];
+                    if (!activatedEffects.Contains(transform.Find("CardEffects").GetChild(i+1).gameObject))
+                    {
+                        activatedEffects.Add(transform.Find("CardEffects").GetChild(i+1).gameObject);
+                    }
+                    activatedEffects[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.activatedEffectText[i];
                     activatedEffects[i].GetComponent<CardEffectGUIBehaviour>().effectNumber = i;
                 }
                 if (card.deathWalk)
                 {
-                    deathWalk = transform.Find("CardEffects").GetChild(3).gameObject;
+                    deathWalk = transform.Find("CardEffects").GetChild(4).gameObject;
                     deathWalk.GetComponent<CardEffectGUIBehaviour>().effectNumber = 3;
-                    deathWalk.transform.GetChild(2).GetComponent<TextMeshProUGUI>().text = card.deathWalkText;
+                    deathWalk.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.deathWalkText;
                 }
-                shroud = transform.Find("CardEffects").GetChild(4).gameObject;
+                shroud = transform.Find("CardEffects").GetChild(5).gameObject;
                 shroud.GetComponent<CardEffectGUIBehaviour>().effectNumber = 4;
             }
 
@@ -125,6 +128,10 @@ public class CardDisplay : MonoBehaviour
     }
     public void SetBounty(int bountyNo)
     {
+        foreach (Transform t in bounty.transform)
+        {
+            t.gameObject.SetActive(false);
+        }
         for (int i = 0; i < bountyNo; i++)
         {
             bounty.transform.GetChild(i).gameObject.SetActive(true);

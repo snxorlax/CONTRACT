@@ -381,13 +381,9 @@ public class PlayerManager : NetworkBehaviour
         {
             card.GetComponent<CardDisplay>().card = Instantiate(card.GetComponent<CardDisplay>().cardCatalogue.CardList[num]);
         }
-        if (card.GetComponent<CardDisplay>().card.cardEffect)
-        {
-            card.GetComponent<CardDisplay>().card.cardEffect.self = card;
-        }
+        card.GetComponent<CardDisplay>().card.cardEffect.self = card;
         card.GetComponent<CardDisplay>().card.cardEffect.CardSetup();
         card.GetComponent<CardDisplay>().SetCardProperties();
-        card.GetComponent<CardBehaviour>().SetCard();
         if (hasAuthority)
         {
             if (action == "Draw")
@@ -403,7 +399,7 @@ public class PlayerManager : NetworkBehaviour
             if (action == "Play")
             {
                 card.GetComponent<CardBehaviour>().SetCard();
-                card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
+                // card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
                 if (num == 0)
                 {
                     GameManager.GetComponent<GameManager>().OnPlay?.Invoke(card.GetComponent<CardDisplay>().card);
@@ -447,7 +443,6 @@ public class PlayerManager : NetworkBehaviour
                 playerHand.Remove(card);
                 this.GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
                 card.GetComponent<AnimateCard>().StartPlayerPlay();
-                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
             }
             if (action == "Destroy")
             {
@@ -543,6 +538,8 @@ public class PlayerManager : NetworkBehaviour
                         this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
                         break;
                 }
+                //Placeholder Animation
+                card.GetComponent<AnimateCard>().StartPlayerPlay();
             }
             else if (action == "Return")
             {

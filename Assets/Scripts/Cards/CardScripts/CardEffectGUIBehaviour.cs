@@ -13,7 +13,7 @@ public class CardEffectGUIBehaviour : MonoBehaviour, IPointerEnterHandler, IPoin
     public Color originalColor;
     private void Start()
     {
-        border = transform.Find("Border").GetComponent<Image>();
+        border = transform.Find("EffectImage").Find("Border").GetComponent<Image>();
         originalColor = border.color;
         card = transform.parent.parent.gameObject;
         cardEffect = card.GetComponent<CardDisplay>().card.cardEffect;

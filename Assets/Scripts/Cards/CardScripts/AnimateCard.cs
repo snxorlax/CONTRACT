@@ -99,6 +99,7 @@ public class AnimateCard : MonoBehaviour
     }
     public void CompletePlayerPlay()
     {
+        transform.Find("Front").Find("Text").gameObject.SetActive(false);
         StartCoroutine(CompleteAnimatePlayerPlay());
     }
     public IEnumerator CompleteAnimatePlayerPlay(){

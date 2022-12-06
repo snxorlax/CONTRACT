@@ -11,9 +11,9 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     public Card card;
 
     //GameObjects associated with localPlayer
-    public GameObject player, handZone, playerField, enemyField, playerAvatar, enemyAvatar, playerUtility, playerDiscard;
+    public GameObject player, handZone, playerField, enemyField, playerAvatar, enemyAvatar, playerUtility, playerDiscard, mainBoard;
     //Indicator associated with this object
-    public GameObject indicator, cardEffect;
+    public GameObject indicator, cardEffect, hoverCard;
     //GameManager associated with this card's localPlayer
     public GameManager gameManager;
     //PlayerManager associated with this card's localPlayer
@@ -45,7 +45,9 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         playerField = GameObject.Find("PlayerField").gameObject;
         playerUtility = GameObject.Find("PlayerUtility").gameObject;
         playerDiscard = GameObject.Find("PlayerDiscard").gameObject;
+        mainBoard = GameObject.Find("MainBoard").gameObject;
         indicator = transform.Find("Indicator").gameObject;
+        hoverCard = GameObject.Find("HoverCard");
         player = NetworkClient.connection.identity.gameObject;
         playerManager = player.GetComponent<PlayerManager>();
         playerDisplay = player.GetComponent<Display>();
@@ -207,10 +209,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 }
 
             }
-            else if (card.shroud && playerManager.isTurn && hasAuthority && card.currentZone == "Field" && canAmbush)
-            {
-                cardEffect.transform.GetChild(4).gameObject.SetActive(true);
-            }
             handZone.transform.position = originalHandPos;
             handZone.transform.localScale = originalHandScale;
             
@@ -227,6 +225,9 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             transform.parent.SetSiblingIndex(8);
             if (pointerEventData.button == PointerEventData.InputButton.Right && card.activatedEffectText.Count > 0)
             {
+                cardEffect.transform.position = mainBoard.transform.position;
+                cardEffect.transform.localScale *= 3.7f;
+                playerDisplay.DisplayHorizontal(GetComponent<CardDisplay>().activatedEffects, Display.effectOffset);
                 cardEffect.transform.GetChild(0).gameObject.SetActive(true);
             }
 
@@ -235,9 +236,17 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             if (pointerEventData.button == PointerEventData.InputButton.Right)
             {
-                cardEffect.transform.GetChild(3).gameObject.SetActive(true);
+                cardEffect.transform.GetChild(0).gameObject.SetActive(true);
+                cardEffect.transform.GetChild(4).gameObject.SetActive(true);
             }
 
+        }
+        else if (card.shroud && playerManager.isTurn && hasAuthority && card.currentZone == "Field" && canAmbush)
+        {
+            cardEffect.transform.GetChild(0).gameObject.SetActive(true);
+            cardEffect.transform.position = mainBoard.transform.position;
+            cardEffect.transform.localScale *= 3.7f;
+            cardEffect.transform.GetChild(5).gameObject.SetActive(true);
         }
     }
     public void OnEndDrag(PointerEventData pointerEventData)
@@ -298,8 +307,10 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             cardEffect.transform.GetChild(2).gameObject.SetActive(false);
             cardEffect.transform.GetChild(3).gameObject.SetActive(false);
             cardEffect.transform.GetChild(4).gameObject.SetActive(false);
+            cardEffect.transform.GetChild(5).gameObject.SetActive(false);
             isDragging = false;
             // enemyAvatar.transform.Find("Indicator").gameObject.GetComponent<Image>().enabled = false;
+            cardEffect.transform.localScale = new Vector3(1, 1, 1);
 
         }
     }
@@ -338,14 +349,13 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         if (interactable)
         {
             hover = true;
-            if (card.currentZone == "Field" && transform.Find("HoverImage") && isDragging == false)
+            if (card.currentZone == "Field")
             {
-                if (!(gameObject.transform.parent == enemyField.transform && card.shroud))
+                if (!(!hasAuthority && card.shroud))
                 {
-                    transform.Find("HoverImage").GetComponent<CardDisplay>().card = card;
-                    transform.Find("HoverImage").GetComponent<CardDisplay>().SetCardProperties();
-                    transform.Find("HoverImage").gameObject.SetActive(true);
-                    transform.parent.SetSiblingIndex(11);
+                    hoverCard.GetComponent<CardDisplay>().card = card;
+                    hoverCard.GetComponent<CardDisplay>().SetCardProperties();
+                    hoverCard.transform.Find("Front").gameObject.SetActive(true);
                 }
             }
             if (transform.parent == handZone.transform)
@@ -373,11 +383,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public void OnPointerExit(PointerEventData pointerEventData)
     {
-        if (card.currentZone == "Field" && transform.Find("HoverImage"))
-        {
-            transform.Find("HoverImage").gameObject.SetActive(false);
-            transform.parent.SetSiblingIndex(11);
-        }
+        hoverCard.transform.Find("Front").gameObject.SetActive(false);
 
         if (card.currentZone == "Hand")
         {

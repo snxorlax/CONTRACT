@@ -5,7 +5,7 @@ using Mirror;
 
 public class Display : MonoBehaviour
 {
-    public static float handOffset, enemyHandOffset, fieldOffset, discardOffset, centerVert;
+    public static float handOffset, enemyHandOffset, fieldOffset, discardOffset, centerVert, effectOffset;
 
     private void Awake()
     {
@@ -14,32 +14,46 @@ public class Display : MonoBehaviour
         fieldOffset = 60f;
         discardOffset = 15f;
         centerVert = -1275f;
+        effectOffset = 110;
     }
     
-    public void DisplayHorizontal(List<GameObject> hand, float offset)
+    public void DisplayHorizontal(List<GameObject> card, float offset)
     {
         List<Vector2> positions = new List<Vector2>();
-        if (hand.Count > 0)
+        if (card.Count > 0)
         {
-            positions = GeneratePositionsHorizontal(hand.Count, hand[0], offset);
+            positions = GeneratePositionsHorizontal(card.Count, card[0], offset);
         }
 
-        for (int i = 0; i < hand.Count; i++)
+        for (int i = 0; i < card.Count; i++)
         {
-            hand[i].transform.localPosition = positions[i];
+            card[i].transform.localPosition = positions[i];
         }
     }    
-    public void DisplayVertical(List<GameObject> hand, float offset)
+    public void DisplayHorizontalWorldSpace(List<GameObject> card, float offset)
     {
         List<Vector2> positions = new List<Vector2>();
-        if (hand.Count > 0)
+        if (card.Count > 0)
         {
-            positions = GeneratePositionsVertical(hand.Count, hand[0], offset);
+            positions = GeneratePositionsHorizontal(card.Count, card[0], offset);
         }
 
-        for (int i = 0; i < hand.Count; i++)
+        for (int i = 0; i < card.Count; i++)
         {
-            hand[i].transform.localPosition = positions[i];
+            card[i].transform.position = positions[i];
+        }
+    }    
+    public void DisplayVertical(List<GameObject> card, float offset)
+    {
+        List<Vector2> positions = new List<Vector2>();
+        if (card.Count > 0)
+        {
+            positions = GeneratePositionsVertical(card.Count, card[0], offset);
+        }
+
+        for (int i = 0; i < card.Count; i++)
+        {
+            card[i].transform.localPosition = positions[i];
         }
     }    
 
