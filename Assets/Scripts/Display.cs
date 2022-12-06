@@ -13,7 +13,7 @@ public class Display : MonoBehaviour
         enemyHandOffset = -55f;
         fieldOffset = 60f;
         discardOffset = 15f;
-        centerVert = -1275f;
+        centerVert = -1150f;
         effectOffset = 110;
     }
     

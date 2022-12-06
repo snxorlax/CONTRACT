@@ -394,7 +394,7 @@ public class PlayerManager : NetworkBehaviour
                 UpdateDeckCount();
                 playerHand.Add(card);
                 card.GetComponent<AnimateCard>().DrawPlayerCard();
-                this.GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
+                GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
             }
             if (action == "Play")
             {
@@ -446,7 +446,6 @@ public class PlayerManager : NetworkBehaviour
             }
             if (action == "Destroy")
             {
-                Debug.Log("Destroy");
                 if (card.GetComponent<NetworkIdentity>().hasAuthority)
                 {
                     card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
@@ -483,6 +482,7 @@ public class PlayerManager : NetworkBehaviour
                 this.GetComponent<Display>().DisplayVertical(playerDiscard, Display.discardOffset);
                 this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
                 this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
+                // StopAllCoroutines();
             }
             if (action == "Restore")
             {

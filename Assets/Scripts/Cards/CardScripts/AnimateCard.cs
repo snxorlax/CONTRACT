@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class AnimateCard : MonoBehaviour
 {
     public Transform cardEffectIndicator, front, back, mainBoard;
+    public Card card;
     
     public Animator cardAnimator, cardIndicatorAnimator;
     public AnimationClip drawClipPlayer, drawClipEnemy, playClipEnemy;
@@ -13,6 +14,7 @@ public class AnimateCard : MonoBehaviour
 
     private void Awake()
     {
+        card = GetComponent<CardDisplay>().card;
         cardAnimator = GetComponent<Animator>();
         front = transform.Find("Front");
         back = transform.Find("Back");
@@ -27,9 +29,9 @@ public class AnimateCard : MonoBehaviour
     {
         if (GetComponent<CardBehaviour>().playerManager.openingDraw)
         {
-            cardAnimator.enabled = true;
-            cardAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
-            Invoke("DisableAnimator", 2);
+            // cardAnimator.enabled = true;
+            // cardAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
+            // Invoke("DisableAnimator", 3);
         }
         else{
             front.gameObject.SetActive(false);
@@ -100,6 +102,11 @@ public class AnimateCard : MonoBehaviour
     public void CompletePlayerPlay()
     {
         transform.Find("Front").Find("Text").gameObject.SetActive(false);
+        GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
+        // if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
+        // {
+        //     GetComponent<CardDisplay>().statBoxPlay.gameObject.SetActive(true);
+        // }
         StartCoroutine(CompleteAnimatePlayerPlay());
     }
     public IEnumerator CompleteAnimatePlayerPlay(){
@@ -110,7 +117,6 @@ public class AnimateCard : MonoBehaviour
             yield return null;
         }
         StopAllCoroutines();
-        GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
     }
     public void PlayEnemyCard()
     {
@@ -127,6 +133,10 @@ public class AnimateCard : MonoBehaviour
         front.localScale = cardEffectIndicator.transform.Find("Front").localScale;
         transform.rotation = Quaternion.identity;
         front.position = cardEffectIndicator.position;
+        // if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
+        // {
+        //     GetComponent<CardDisplay>().statBoxPlay.gameObject.SetActive(true);
+        // }
         StartCoroutine(CompleteEnemyPlayAnimation());
     }
     public IEnumerator CompleteEnemyPlayAnimation(){

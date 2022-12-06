@@ -54,15 +54,18 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         originalScale = transform.localScale;
 
         card = GetComponent<CardDisplay>().card;
-        cardEffect = transform.Find("CardEffects").gameObject;
+        if (transform.Find("CardEffects"))
+        {
+            cardEffect = transform.Find("CardEffects").gameObject;
+            playerManager.selectedUnits.Callback += OnUnitListUpdated;
+            playerManager.selectedRelics.Callback += OnRelicListUpdated;
+        }
 
         originalHandPos = handZone.transform.position;
         originalHandScale = handZone.transform.localScale;
         
         canAttack = true;
 
-        playerManager.selectedUnits.Callback += OnUnitListUpdated;
-        playerManager.selectedRelics.Callback += OnRelicListUpdated;
     }
     public void OnUnitListUpdated(SyncList<GameObject>.Operation op, int index, GameObject oldUnit, GameObject newUnit)
     {
@@ -527,14 +530,13 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public IEnumerator ResetAttacker(GameObject attacker, Vector2 originalPos)
     {
-        while ((Vector2)attacker.transform.position != originalPos)
+        while ((Vector2)attacker.transform.position != originalPos && attacker.GetComponent<CardDisplay>().card.currentZone == "Field")
         {
             attacker.transform.position = Vector2.Lerp(attacker.transform.position, originalPos, .015f);
 
             yield return new WaitForSeconds(.01f);
 
         }
-        attacker.transform.parent.SetSiblingIndex(8);
     }
 
 }
