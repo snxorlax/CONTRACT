@@ -2,11 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Mirror;
 
-public class AnimateCard : MonoBehaviour
+public class AnimateCard : NetworkBehaviour
 {
     public Transform cardEffectIndicator, front, back, mainBoard;
     public Card card;
+    public PlayerManager playerManager;
+    public GameManager gameManager;
     
     public Animator cardAnimator, cardIndicatorAnimator;
     public AnimationClip drawClipPlayer, drawClipEnemy, playClipEnemy;
@@ -24,6 +27,11 @@ public class AnimateCard : MonoBehaviour
         mainBoard = GameObject.Find("MainBoard").transform;
         canvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
         
+    }
+    private void OnEnable()
+    {
+        playerManager = NetworkClient.connection.identity.GetComponent<PlayerManager>();
+        gameManager = playerManager.gameManager;
     }
     public void DrawPlayerCard()
     {
@@ -70,6 +78,7 @@ public class AnimateCard : MonoBehaviour
             front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
             yield return null;
         }
+        gameManager.actionComplete = true;
     }
     public void CompleteEnemyDrawAnimation()
     {
@@ -86,6 +95,7 @@ public class AnimateCard : MonoBehaviour
             yield return null;
         }
         front.gameObject.SetActive(true);
+        gameManager.actionComplete = true;
     }
     public void StartPlayerPlay(){
         StartCoroutine(AnimatePlayerPlay());
@@ -103,10 +113,14 @@ public class AnimateCard : MonoBehaviour
     {
         transform.Find("Front").Find("Text").gameObject.SetActive(false);
         GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
-        // if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
-        // {
-        //     GetComponent<CardDisplay>().statBoxPlay.gameObject.SetActive(true);
-        // }
+        if (!card)
+        {
+            card = GetComponent<CardDisplay>().card;
+        }
+        if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
+        {
+            GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
+        }
         StartCoroutine(CompleteAnimatePlayerPlay());
     }
     public IEnumerator CompleteAnimatePlayerPlay(){
@@ -133,10 +147,15 @@ public class AnimateCard : MonoBehaviour
         front.localScale = cardEffectIndicator.transform.Find("Front").localScale;
         transform.rotation = Quaternion.identity;
         front.position = cardEffectIndicator.position;
-        // if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
-        // {
-        //     GetComponent<CardDisplay>().statBoxPlay.gameObject.SetActive(true);
-        // }
+        transform.Find("Front").Find("Text").gameObject.SetActive(false);
+        if (!card)
+        {
+            card = GetComponent<CardDisplay>().card;
+        }
+        if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
+        {
+            GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
+        }
         StartCoroutine(CompleteEnemyPlayAnimation());
     }
     public IEnumerator CompleteEnemyPlayAnimation(){

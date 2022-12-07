@@ -34,7 +34,7 @@ public class MadfleetParagonEffect : CardEffect
         player.currentContract.Remove(self);
         gameManager.EnableZone(gameManager.playerManager.playerHandArea);
         gameManager.EnableZone(gameManager.playerManager.playerUtilityArea);
-        base.ContractEffect();
+        // base.ContractEffect();
     }
 
     public override void Deathwalk()

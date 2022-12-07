@@ -933,7 +933,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &587298078023373626
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1499,7 +1499,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8980392, g: 0.8980392, b: 0.8980392, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -2540,19 +2540,20 @@ MonoBehaviour:
   card: {fileID: 0}
   frame: {fileID: 0}
   statBox: {fileID: 0}
-  statBoxPlay: {fileID: 0}
+  statBoxField: {fileID: 0}
   text: {fileID: 0}
+  statBackgroundField: {fileID: 0}
   art: {fileID: 0}
   frameOuter: {fileID: 0}
   frameMain: {fileID: 0}
   frameInner: {fileID: 0}
   frameShadow: {fileID: 0}
   statFrame: {fileID: 0}
-  statFramePlay: {fileID: 0}
+  statFrameField: {fileID: 0}
   bounty: {fileID: 0}
   cardText: {fileID: 0}
   battleStats: {fileID: 0}
-  battleStatsPlay: {fileID: 0}
+  battleStatsField: {fileID: 0}
   cardName: {fileID: 0}
   cardTypeText: {fileID: 0}
   henchmanColors:
@@ -3818,7 +3819,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &5012187027208170517
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3853,7 +3854,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1885628625729500550}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
@@ -3875,7 +3876,7 @@ MonoBehaviour:
   m_fontMaterials: []
   m_fontColor32:
     serializedVersion: 2
-    rgba: 1828716543
+    rgba: 4294967295
   m_fontColor: {r: 1, g: 1, b: 1, a: 1}
   m_enableVertexGradient: 0
   m_colorMode: 3
@@ -6134,7 +6135,7 @@ RectTransform:
   m_GameObject: {fileID: 4167908435585666238}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.25453508, y: 0.25453508, z: 0.25453508}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 7825374476591571199}
   m_RootOrder: 0
@@ -6142,7 +6143,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 17.8}
+  m_SizeDelta: {x: 37.9, y: 9.8}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4686768639504830045
 CanvasRenderer:
@@ -6199,11 +6200,11 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 32.1
+  m_fontSize: 8.75
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
-  m_fontSizeMin: 25.3
+  m_fontSizeMin: 5.6
   m_fontSizeMax: 32.1
   m_fontStyle: 0
   m_HorizontalAlignment: 2
@@ -6235,7 +6236,7 @@ MonoBehaviour:
   m_VertexBufferAutoSizeReduction: 0
   m_useMaxVisibleDescender: 1
   m_pageToDisplay: 1
-  m_margin: {x: 37.346107, y: -9.920065, z: 37.346104, w: -8.753014}
+  m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
   m_hasFontAssetChanged: 0
@@ -8029,7 +8030,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.8980392, g: 0.8980392, b: 0.8980392, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8418,7 +8419,7 @@ RectTransform:
   m_GameObject: {fileID: 5757846254774796907}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.8462844, y: 0.796503, z: 0.796503}
+  m_LocalScale: {x: 0.85686296, y: 0.82587403, z: 0.796503}
   m_Children: []
   m_Father: {fileID: 2881397777598609397}
   m_RootOrder: 3
@@ -8449,7 +8450,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.1981132, g: 0.15316632, b: 0, a: 1}
+  m_Color: {r: 0, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -8500,7 +8501,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0.1, y: -64.7}
+  m_AnchoredPosition: {x: 0, y: -65.5}
   m_SizeDelta: {x: 48.3, y: 17.1}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &5863909866212374488
@@ -8746,19 +8747,20 @@ MonoBehaviour:
   card: {fileID: 0}
   frame: {fileID: 0}
   statBox: {fileID: 0}
-  statBoxPlay: {fileID: 0}
+  statBoxField: {fileID: 0}
   text: {fileID: 0}
+  statBackgroundField: {fileID: 0}
   art: {fileID: 0}
   frameOuter: {fileID: 0}
   frameMain: {fileID: 0}
   frameInner: {fileID: 0}
   frameShadow: {fileID: 0}
   statFrame: {fileID: 0}
-  statFramePlay: {fileID: 0}
+  statFrameField: {fileID: 0}
   bounty: {fileID: 0}
   cardText: {fileID: 0}
   battleStats: {fileID: 0}
-  battleStatsPlay: {fileID: 0}
+  battleStatsField: {fileID: 0}
   cardName: {fileID: 0}
   cardTypeText: {fileID: 0}
   henchmanColors:
@@ -9679,8 +9681,8 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 31.57, y: 9.5}
+  m_AnchoredPosition: {x: 0.008, y: 0.022}
+  m_SizeDelta: {x: 37.906, y: 9.803}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &9101371341716405678
 CanvasRenderer:
@@ -11780,15 +11782,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3794942570605853997, guid: 5fe687fb3ddf3e34f9ffe06e608d72e5, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1.0591828
+      value: 0.3027233
       objectReference: {fileID: 0}
     - target: {fileID: 3794942570605853997, guid: 5fe687fb3ddf3e34f9ffe06e608d72e5, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.17758062
+      value: 0.30288696
       objectReference: {fileID: 0}
     - target: {fileID: 3794942570605853997, guid: 5fe687fb3ddf3e34f9ffe06e608d72e5, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1.3106
+      value: 0.96665925
       objectReference: {fileID: 0}
     - target: {fileID: 3794942570605853997, guid: 5fe687fb3ddf3e34f9ffe06e608d72e5, type: 3}
       propertyPath: m_LocalPosition.x
@@ -11796,7 +11798,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3794942570605853997, guid: 5fe687fb3ddf3e34f9ffe06e608d72e5, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.1323
       objectReference: {fileID: 0}
     - target: {fileID: 3794942570605853997, guid: 5fe687fb3ddf3e34f9ffe06e608d72e5, type: 3}
       propertyPath: m_LocalPosition.z

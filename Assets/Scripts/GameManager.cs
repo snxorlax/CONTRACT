@@ -25,6 +25,13 @@ public class GameManager : NetworkBehaviour
     public GameObject player, enemy;
     public GameObject cardIndicator;
     public Animator cardIndicatorAnimator;
+    
+    // Action Queue for separating animations, events, actions, etc.
+    public Queue<IEnumerator> actionQueue = new Queue<IEnumerator>();
+    // bool for playing through Queue
+    public bool actionQueuePlaying = false;
+    // bool for current action completion
+    public bool actionComplete;
 
     //Events
     public PlayerEvent OnTurnStart = new PlayerEvent();
@@ -45,7 +52,30 @@ public class GameManager : NetworkBehaviour
         DelayStartGame();
         players.Callback += OnPlayersUpdated;
         GraveyardUpdate.AddListener(UpdatePoison);
+        //Coroutine is always on, can be triggered to loop through Action Queue
+        StartCoroutine(PlayActionQueue());
         
+    }
+    public void ActivateActionQueue()
+    {
+        actionQueuePlaying = true;
+        foreach (IEnumerator e in actionQueue)
+        {
+            Debug.Log(e);
+        }
+    }
+
+    //Coroutine for looping through Action Queue
+    public IEnumerator PlayActionQueue()
+    {
+        while (true)
+        {
+            while (actionQueue.Count > 0 && actionQueuePlaying)
+            {
+                yield return StartCoroutine(actionQueue.Dequeue());
+            }
+            yield return null;
+        }
     }
     public void OnPlayersUpdated(SyncList<PlayerManager>.Operation op, int index, PlayerManager oldPlayer, PlayerManager newPlayer)
     {
@@ -59,7 +89,6 @@ public class GameManager : NetworkBehaviour
                 }
             }
         }
-
     }
     public void DelayStartGame()
     {
@@ -165,6 +194,10 @@ public class GameManager : NetworkBehaviour
     {
         card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
         card.transform.GetChild(2).gameObject.SetActive(false);
+        if (!hasAuthority)
+        {
+            card.transform.rotation = Quaternion.identity;
+        }
     }
     public void AnimateStats(GameObject target, string val)
     {

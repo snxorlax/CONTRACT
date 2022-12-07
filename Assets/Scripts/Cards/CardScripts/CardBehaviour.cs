@@ -262,6 +262,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 if (card.cardType == Card.CardType.Villain)
                 {
                     card.cardEffect.Contract();
+                    // playerManager.PlayCard(gameObject, false);
                 }
                     if (card.cardType == Card.CardType.Henchman && !playerManager.hasSummon)
                     {
@@ -359,6 +360,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     hoverCard.GetComponent<CardDisplay>().card = card;
                     hoverCard.GetComponent<CardDisplay>().SetCardProperties();
                     hoverCard.transform.Find("Front").gameObject.SetActive(true);
+                    hoverCard.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
                 }
             }
             if (transform.parent == handZone.transform)

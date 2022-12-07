@@ -7,10 +7,10 @@ using TMPro;
 public class CardDisplay : MonoBehaviour
 {
     public Card card;
-    public Transform frame, statBox, statBoxPlay, text;
-    public Image art, frameOuter, frameMain, frameInner, frameShadow, statFrame, statFramePlay;
+    public Transform frame, statBox, statBoxField, text, statBackgroundField;
+    public Image art, frameOuter, frameMain, frameInner, frameShadow, statFrame,  statFrameField;
     public GameObject bounty;
-    public TextMeshProUGUI cardText, battleStats, battleStatsPlay, cardName, cardTypeText;
+    public TextMeshProUGUI cardText, battleStats, battleStatsField, cardName, cardTypeText;
     public List<Color> henchmanColors, relicColors, vaColors, calamityColors, villainColors;
     public List<GameObject> activatedEffects;
     public GameObject deathWalk, shroud;
@@ -42,9 +42,10 @@ public class CardDisplay : MonoBehaviour
 
             //Set statbox to proper object
             statBox = transform.Find("Front").Find("StatBox");
-            // statBoxPlay = transform.Find("Front").Find("StatBoxField");
+            statBoxField = transform.Find("Front").Find("StatBoxField");
             statFrame = statBox.Find("Background").Find("Frame").GetComponent<Image>();
-            // statFramePlay = statBoxPlay.Find("Background").Find("Frame").GetComponent<Image>();
+            statBackgroundField = statBoxField.Find("Background");
+            statFrameField = statBoxField.Find("Background").Find("Frame").GetComponent<Image>();
 
             if (transform.Find("CardEffects"))
             {
@@ -72,7 +73,7 @@ public class CardDisplay : MonoBehaviour
                 case Card.CardType.Henchman:
                     frameOuter.color = henchmanColors[0];
                     statFrame.color = henchmanColors[0];
-                    // statFramePlay.color = henchmanColors[0];
+                    statFrameField.color = henchmanColors[0];
                     frameMain.color = henchmanColors[1];
                     frameInner.color = henchmanColors[2];
                     frameShadow.color = henchmanColors[3];
@@ -93,8 +94,10 @@ public class CardDisplay : MonoBehaviour
                 case Card.CardType.Villain:
                     frameOuter.color = villainColors[0];
                     statFrame.color = villainColors[0];
-                    // statFramePlay.color = villainColors[0];
+                    statFrameField.color = villainColors[0];
                     frameMain.color = villainColors[1];
+                    statBackgroundField.GetChild(1).GetComponent<Image>().color = villainColors[1];
+                    statBackgroundField.GetChild(2).GetComponent<Image>().color = villainColors[1];
                     frameInner.color = villainColors[2];
                     frameShadow.color = villainColors[3];
                     SetBounty(card.bounty);
@@ -113,16 +116,16 @@ public class CardDisplay : MonoBehaviour
             if (card.cardType != Card.CardType.Henchman && card.cardType!= Card.CardType.Villain && card.cardType != Card.CardType.Calamity)
             {
                statBox.gameObject.SetActive(false);
-            //    statBoxPlay.gameObject.SetActive(false);
+               statBoxField.gameObject.SetActive(false);
             }
-            // if (card.currentZone != "Field")
-            // {
-            //    statBoxPlay.gameObject.SetActive(false);
-            // }
+            if (card.currentZone != "Field")
+            {
+               statBoxField.gameObject.SetActive(false);
+            }
             battleStats = statBox.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-            // battleStatsPlay = statBoxPlay.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-            battleStats.text = card.attack.ToString() + " / " + card.health.ToString();
-            battleStats.text = card.attack.ToString() + " / " + card.health.ToString();
+            battleStatsField = statBoxField.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
+            battleStats.text = card.attack.ToString() + "  /  " + card.health.ToString();
+            battleStatsField.text = card.attack.ToString() + "  /  " + card.health.ToString();
 
             text = transform.Find("Front").Find("Text");
             cardText = text.Find("CardText").gameObject.GetComponent<TextMeshProUGUI>();

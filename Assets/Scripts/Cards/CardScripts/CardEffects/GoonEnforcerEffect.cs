@@ -15,6 +15,7 @@ public class GoonEnforcerEffect : CardEffect
         foreach (GameObject g in player.playerField)
         {
             currentTypes.Add(g.GetComponent<CardDisplay>().card.cardType);
+            Debug.Log(g.GetComponent<CardDisplay>().card.cardType);
         }
         if (currentTypes.Contains(Card.CardType.Villain))
         {

@@ -9,6 +9,13 @@ using TMPro;
 
 public class PlayerManager : NetworkBehaviour
 {
+    //GameManager
+    public GameObject GameManager;
+    public GameManager gameManager;
+    //Action Queue
+    public Queue<IEnumerator> actionQueue;
+    //Action Queue Bool
+    public bool actionComplete = false;
     //Work in Progress Lists
     public List<GameObject> playerHand = new List<GameObject>();
     public List<GameObject> enemyHand = new List<GameObject>();
@@ -31,7 +38,7 @@ public class PlayerManager : NetworkBehaviour
     public GameObject deckIndicator, enemyDeckIndicator;
 
     //Areas where cards can be spawned, etc.
-    public GameObject GameManager, Player, Enemy, playerHandArea, playerDiscardArea, enemyHandArea, playerFieldArea, playerUtilityArea, enemyFieldArea, enemyUtilityArea, enemyDiscardArea;
+    public GameObject Player, Enemy, playerHandArea, playerDiscardArea, enemyHandArea, playerFieldArea, playerUtilityArea, enemyFieldArea, enemyUtilityArea, enemyDiscardArea;
     public GameObject card, playerAvatarZone, enemyAvatarZone, playerFieldIndicator, playerUtilityIndicator, gameText;
     public PlayerInfo playerInfo;
 
@@ -49,6 +56,8 @@ public class PlayerManager : NetworkBehaviour
     private void Awake()
     {
         GameManager = GameObject.Find("GameManager");
+        gameManager = GameManager.GetComponent<GameManager>();
+        actionQueue = gameManager.actionQueue;
     }
     public override void OnStartClient()
     {
@@ -74,6 +83,7 @@ public class PlayerManager : NetworkBehaviour
         enemyDeckCount = enemyDeckIndicator.transform.Find("DeckInfo").Find("DeckCount").GetComponent<TextMeshProUGUI>();
 
 
+
         Enemy = GameObject.Find("EnemyAvatar");
 
         gameText = GameObject.Find("GameText");
@@ -87,7 +97,7 @@ public class PlayerManager : NetworkBehaviour
     public void CheckContinuous(int oldVal, int newVal)
     {
         Debug.Log(newVal);
-        GameManager.GetComponent<GameManager>().UnitEvent?.Invoke();
+        gameManager.UnitEvent?.Invoke();
     }
     public void UpdatePlayerUnitCount(int val)
     {
@@ -97,6 +107,7 @@ public class PlayerManager : NetworkBehaviour
     public void CmdUpdatePlayerUnitCount(int val)
     {
         playerUnitCount += val;
+        Debug.Log(playerUnitCount);
     }
 
     public void StartPlayer()
@@ -121,18 +132,18 @@ public class PlayerManager : NetworkBehaviour
             player.transform.SetParent(playerAvatarZone.transform, false);
             player.GetComponent<PlayerDisplay>().playerInfo = Instantiate(playerInfo);
             player.GetComponent<PlayerDisplay>().SetPlayerProperties();
-            GameManager.GetComponent<GameManager>().player = player;
+            gameManager.player = player;
         }
         if (!hasAuthority)
         {
             player.transform.SetParent(enemyAvatarZone.transform, false);
             player.GetComponent<PlayerDisplay>().playerInfo = Instantiate(playerInfo);
             player.GetComponent<PlayerDisplay>().SetPlayerProperties();
-            GameManager.GetComponent<GameManager>().enemy = player;
+            gameManager.enemy = player;
         }
         if (isLocalPlayer)
         {
-            DrawCard(5);
+            // QueueDraw(5);
         }
         if (isTurn)
         {
@@ -189,7 +200,7 @@ public class PlayerManager : NetworkBehaviour
     [ClientRpc]
     public void RpcActivateDrawAnimation()
     {
-        foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+        foreach (PlayerManager p in gameManager.players)
         {
             p.openingDraw = false;
         }
@@ -208,9 +219,10 @@ public class PlayerManager : NetworkBehaviour
         else if (!isTurn)
         {
             isTurn = true;
-            if (GameManager.GetComponent<GameManager>().turnNumber > 0)
+            if (gameManager.turnNumber > 0)
             {
-                DrawCard(1);
+                QueueDraw(2);
+                gameManager.ActivateActionQueue();
             }
             UpdateSummonAndAttacks();
         }
@@ -222,15 +234,31 @@ public class PlayerManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdUpdatePlayerList()
     {
-        GameManager.GetComponent<GameManager>().players.Add(GetComponent<PlayerManager>());
+        gameManager.players.Add(GetComponent<PlayerManager>());
 
     }
-    public void DrawCard(int num)
+    //Adds Draw to Action Queue
+    public void QueueDraw(int num)
     {
         for (int i = 0; i < num; i++)
         {
-            CmdDrawCard();
+            actionQueue.Enqueue(DrawCard());
         }
+    }
+    public IEnumerator DrawCard()
+    {
+        //Reset bools to false to begin coroutine
+        actionComplete = false;
+        gameManager.actionComplete = false;
+        //Activate Draw Effect
+        CmdDrawCard();
+        //Wait for animation to finish and set actionComplete to true
+        while (!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
+        Debug.Log(actionQueue.Count);
     }
     [Command(requiresAuthority = false)]
     public void CmdDrawCard()
@@ -258,7 +286,7 @@ public class PlayerManager : NetworkBehaviour
         {
             playerDeckCount.text = playerDeck.Count.ToString();
         }
-        foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+        foreach (PlayerManager p in gameManager.players)
         {
             if (p.enemyManager)
             {
@@ -399,10 +427,9 @@ public class PlayerManager : NetworkBehaviour
             if (action == "Play")
             {
                 card.GetComponent<CardBehaviour>().SetCard();
-                // card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
                 if (num == 0)
                 {
-                    GameManager.GetComponent<GameManager>().OnPlay?.Invoke(card.GetComponent<CardDisplay>().card);
+                    gameManager.OnPlay?.Invoke(card.GetComponent<CardDisplay>().card);
                 }
                 switch (card.GetComponent<CardDisplay>().card.cardType)
                 {
@@ -424,6 +451,7 @@ public class PlayerManager : NetworkBehaviour
                         this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
                         break;
                     case Card.CardType.Villain:
+                        Debug.Log("Play Villain");
                         card.transform.SetParent(playerFieldArea.transform, false);
                         playerField.Add(card);
                         UpdatePlayerUnitCount(1);
@@ -458,14 +486,14 @@ public class PlayerManager : NetworkBehaviour
                     card.transform.Find("Back").gameObject.SetActive(false);
                     card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
                     card.transform.Find("HoverImage").gameObject.SetActive(false);
-                    GameManager.GetComponent<GameManager>().ResetStats(card);
+                    gameManager.ResetStats(card);
                     UpdatePlayerUnitCount(-1);
                 }
                 else if (playerUtility.Contains(card))
                 {
                     playerUtility.Remove(card);
                 }
-                foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+                foreach (PlayerManager p in gameManager.players)
                 {
                     if (p.enemyField.Contains(card))
                     {
@@ -554,10 +582,10 @@ public class PlayerManager : NetworkBehaviour
                     GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
                 }
                 card.transform.SetParent(playerHandArea.transform);
-                GameManager.GetComponent<GameManager>().ResetStats(card);
+                gameManager.ResetStats(card);
                 card.GetComponent<CardDisplay>().card.currentZone = "Hand";
                 card.transform.Find("HoverImage").gameObject.SetActive(false);
-                GameManager.GetComponent<GameManager>().ResetStats(card);
+                gameManager.ResetStats(card);
                 playerHand.Add(card);
                 GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
             }
@@ -579,7 +607,6 @@ public class PlayerManager : NetworkBehaviour
             else if (action == "Play")
             {
                 GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
-                card.transform.Find("Front").Find("Text").gameObject.SetActive(false);
                 card.GetComponent<CardDisplay>().card.currentZone = "Field";
                 if (num != 1)
                 {
@@ -627,7 +654,7 @@ public class PlayerManager : NetworkBehaviour
                     enemyDiscard.Add(card);
                     Debug.Log("!adding");
                 }
-                foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+                foreach (PlayerManager p in gameManager.players)
                 {
                     if (p.enemyField.Contains(card))
                     {
@@ -641,7 +668,7 @@ public class PlayerManager : NetworkBehaviour
                         card.transform.Find("Back").gameObject.SetActive(false);
                         card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
                         card.transform.Find("HoverImage").gameObject.SetActive(false);
-                        GameManager.GetComponent<GameManager>().ResetStats(card);
+                        gameManager.ResetStats(card);
                     }
                     else if (p.enemyUtility.Contains(card))
                     {
@@ -658,7 +685,7 @@ public class PlayerManager : NetworkBehaviour
             else if (action == "Restore")
             {
                 card.GetComponent<CardDisplay>().card.currentZone = "Field";
-                foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+                foreach (PlayerManager p in gameManager.players)
                 {
                     if (card.GetComponent<CardDisplay>().card.cardType == Card.CardType.Henchman)
                     {
@@ -683,7 +710,7 @@ public class PlayerManager : NetworkBehaviour
             }
             else if (action == "Exile")
             {
-                foreach (PlayerManager p in GameManager.GetComponent<GameManager>().players)
+                foreach (PlayerManager p in gameManager.players)
                 {
                     p.enemyDiscard.Remove(card);
                 }
@@ -712,6 +739,7 @@ public class PlayerManager : NetworkBehaviour
                         this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
                         break;
                 }
+                // card.GetComponent<AnimateCard>().PlayEnemyCard();
             }
             else if (action == "Return")
             {
@@ -728,7 +756,7 @@ public class PlayerManager : NetworkBehaviour
                 card.transform.SetParent(enemyHandArea.transform);
                 // card.transform.GetChild(2).gameObject.SetActive(true);
                 card.GetComponent<CardDisplay>().card.currentZone = "Hand";
-                GameManager.GetComponent<GameManager>().ResetStats(card);
+                gameManager.ResetStats(card);
                 enemyHand.Add(card);
                 GetComponent<Display>().DisplayHorizontal(enemyHand, Display.handOffset);
             }
