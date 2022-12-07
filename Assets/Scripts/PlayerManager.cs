@@ -245,6 +245,7 @@ public class PlayerManager : NetworkBehaviour
             actionQueue.Enqueue(DrawCard());
         }
     }
+    //Coroutine for drawing. In order to start, it will be added to the Action Queue
     public IEnumerator DrawCard()
     {
         //Reset bools to false to begin coroutine
@@ -263,11 +264,17 @@ public class PlayerManager : NetworkBehaviour
     [Command(requiresAuthority = false)]
     public void CmdDrawCard()
     {
+        //generates a random number in the range of deck count
         int ran = Random.Range(0, playerDeck.Count);
+        //Instantiates whichever card resides at that deck number (will later be removed)
         Card cardInstance = Instantiate(playerDeck[ran]);
+        //Sets that as the scriptable object to determine the prefab's properties
         card.GetComponent<CardDisplay>().card = cardInstance;
+        //Instantiates a new GameObject with the properties of that card
         GameObject newCard = Instantiate(card, Vector2.zero, Quaternion.identity, transform);
+        //Spawns that card on the server and gives the localClient authority
         NetworkServer.Spawn(newCard, connectionToClient);
+        //Calls a remote procedure call to determine the card's parent object, and which lists it will be added to
         FormatCards(newCard, cardInstance.cardNo, "Draw");
     }
     public void UpdateDeckCount()
@@ -292,8 +299,12 @@ public class PlayerManager : NetworkBehaviour
             {
                 p.enemyDeckCount.text = p.enemyManager.playerDeck.Count.ToString();
             }
-
         }
+    }
+    //Adds PlayCard to Action Queue
+    public void QueuePlay()
+    {
+
     }
     public void PlayCard(GameObject card, bool shroud)
     {
