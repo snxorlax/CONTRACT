@@ -73,7 +73,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             if (playerManager.selectedUnits.Count == playerManager.currentContract[0].GetComponent<CardBehaviour>().card.cardEffect.contractInfo[0].amount && contractSelectable)
             {
-                // playerManager.PlayCard(playerManager.currentContract[0], false);
+                // playerManager.QueuePlay(playerManager.currentContract[0], false);
                 playerManager.currentContract[0].GetComponent<CardDisplay>().card.cardEffect.ContractEffect();
                 contractSelectable = false;
                 // DestroyUnits();
@@ -88,7 +88,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             if (playerManager.selectedRelics.Count == playerManager.currentContract[0].GetComponent<CardBehaviour>().card.cardEffect.contractInfo[0].amount && contractSelectable)
             {
-                playerManager.PlayCard(playerManager.currentContract[0], false);
+                playerManager.QueuePlay(playerManager.currentContract[0], false);
                 contractSelectable = false;
                 DestroyRelics();
                 playerManager.currentContract.Clear();
@@ -173,7 +173,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         }
         if (tempSpell.GetComponent<CardDisplay>().card.cardType == Card.CardType.VillainousArt)
         {
-            playerManager.DestroyCard(tempSpell);
+            playerManager.QueueDestroy(tempSpell);
         }
         effectSelectable = false;
 
@@ -262,7 +262,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 if (card.cardType == Card.CardType.Villain)
                 {
                     card.cardEffect.Contract();
-                    // playerManager.PlayCard(gameObject, false);
+                    // playerManager.QueuePlay(gameObject, false);
                 }
                     if (card.cardType == Card.CardType.Henchman && !playerManager.hasSummon)
                     {
@@ -272,7 +272,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     {
                         if (pointerEventData.button == PointerEventData.InputButton.Right)
                         {
-                            playerManager.PlayCard(gameObject, true);
+                            playerManager.QueuePlay(gameObject, true);
                         }
                         else
                         {
@@ -280,7 +280,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                             {
                                 playerManager.currentEffect.Add(gameObject);
                             }
-                            playerManager.PlayCard(gameObject, false);
+                            playerManager.QueuePlay(gameObject, false);
                         }
                     }
 
@@ -293,7 +293,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     {
                         playerManager.currentEffect.Add(gameObject);
                     }
-                    playerManager.PlayCard(gameObject, false);
+                    playerManager.QueuePlay(gameObject, false);
                 }
             }
             playerDisplay.DisplayHorizontal(playerManager.playerHand, Display.handOffset);
@@ -485,7 +485,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             foreach (GameObject obj in p.selectedUnits)
             {
-                p.DestroyCard(obj);
+                p.QueueDestroy(obj);
             }
         }
         playerManager.UpdateSelectedUnits(gameObject, false);
@@ -509,7 +509,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             foreach (GameObject obj in p.selectedRelics)
             {
                 // Debug.Log("Test");
-                p.DestroyCard(obj);
+                p.QueueDestroy(obj);
             }
         }
         playerManager.UpdateSelectedRelics(gameObject, false);

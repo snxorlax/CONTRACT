@@ -60,7 +60,7 @@ public class PlayerAvatarBehaviour : NetworkBehaviour, IDropHandler, IPointerEnt
                 }
                 if (tempSpell.GetComponent<CardDisplay>().card.cardType == Card.CardType.VillainousArt)
                 {
-                    player.DestroyCard(tempSpell);
+                    player.QueueDestroy(tempSpell);
                 }
                 effectSelectable = false;
 

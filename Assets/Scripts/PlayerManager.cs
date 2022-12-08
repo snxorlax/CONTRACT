@@ -127,6 +127,7 @@ public class PlayerManager : NetworkBehaviour
     public void RpcStartPlayer(GameObject player)
     {
         playerDeck.AddRange(deck.mainDeck);
+        UpdateDeckCount();
         if (hasAuthority)
         {
             player.transform.SetParent(playerAvatarZone.transform, false);
@@ -253,13 +254,12 @@ public class PlayerManager : NetworkBehaviour
         gameManager.actionComplete = false;
         //Activate Draw Effect
         CmdDrawCard();
-        //Wait for animation to finish and set actionComplete to true
+        //Wait for animation to finish and set GameManager's actionComplete to true
         while (!actionComplete)
         {
             actionComplete = gameManager.actionComplete;
             yield return null;
         }
-        Debug.Log(actionQueue.Count);
     }
     [Command(requiresAuthority = false)]
     public void CmdDrawCard()
@@ -277,6 +277,7 @@ public class PlayerManager : NetworkBehaviour
         //Calls a remote procedure call to determine the card's parent object, and which lists it will be added to
         FormatCards(newCard, cardInstance.cardNo, "Draw");
     }
+    //Called to refresh deck count number
     public void UpdateDeckCount()
     {
         CmdUpdateDeckCount();
@@ -289,26 +290,38 @@ public class PlayerManager : NetworkBehaviour
     [ClientRpc]
     public void RpcUpdateDeckCount()
     {
+        //Checks if you are local player, then associates your deck with playerDeck
         if (isLocalPlayer)
         {
             playerDeckCount.text = playerDeck.Count.ToString();
         }
         foreach (PlayerManager p in gameManager.players)
         {
+            //Iterates through players and finds the enemy
             if (p.enemyManager)
             {
+                // associates enemy deck with the non local player's deck count
                 p.enemyDeckCount.text = p.enemyManager.playerDeck.Count.ToString();
             }
         }
     }
     //Adds PlayCard to Action Queue
-    public void QueuePlay()
+    public void QueuePlay(GameObject card, bool shroud)
     {
-
+        actionQueue.Enqueue(PlayCard(card, shroud));
     }
-    public void PlayCard(GameObject card, bool shroud)
+    public IEnumerator PlayCard(GameObject card, bool shroud)
     {
+        //Must make both bools false to ensure coroutine completes before next one is activated
+        actionComplete = false;
+        gameManager.actionComplete = false;
         CmdPlayCard(card, shroud);
+        // Waits until action is complete and the Gamemanager's actionComplete bool is true;
+        while (!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
     }
     [Command]
     public void CmdPlayCard(GameObject card, bool shroud)
@@ -323,13 +336,24 @@ public class PlayerManager : NetworkBehaviour
         }
 
     }
+    //Adds DestroyCard to Action Queue
     public void QueueDestroy(GameObject card)
     {
-
+        actionQueue.Enqueue(DestroyCard(card));
     }
-    public void DestroyCard(GameObject card)
+    //Coroutine for Destroying. Must be addeed to Action Queue to activate. Might be better implementation to handle simultaneous destruction.
+    public IEnumerator DestroyCard(GameObject card)
     {
+        //Must make both bools false to ensure coroutine completes before next one is activated
+        actionComplete = false;
+        gameManager.actionComplete = false;
         CmdDestroyCard(card);
+        // Waits until action is complete and the Gamemanager's actionComplete bool is true;
+        while (!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
     }
     [Command(requiresAuthority = false)]
     public void CmdDestroyCard(GameObject card)
@@ -501,6 +525,7 @@ public class PlayerManager : NetworkBehaviour
                     playerField.Remove(card);
                     card.transform.Find("Back").gameObject.SetActive(false);
                     card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
+                    card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
                     gameManager.ResetStats(card);
                     UpdatePlayerUnitCount(-1);
                 }
@@ -683,6 +708,7 @@ public class PlayerManager : NetworkBehaviour
                         // this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
                         card.transform.Find("Back").gameObject.SetActive(false);
                         card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
+                        card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
                         card.transform.Find("HoverImage").gameObject.SetActive(false);
                         gameManager.ResetStats(card);
                     }

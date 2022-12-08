@@ -40,7 +40,7 @@ public class CardEffect : ScriptableObject
         playerField = GameObject.Find("PlayerField");
     }
     public virtual void ContractEffect(){
-        player.PlayCard(self, false);
+        player.QueuePlay(self, false);
     }
     //effect activated when card is played
     public virtual void Play(){

@@ -22,7 +22,7 @@ public class DreamVialEffect : CardEffect
     {
         player.ReturnCard(target);
         player.QueueDraw(1);
-        player.DestroyCard(self);
+        player.QueueDestroy(self);
         base.Effect1(target);
         foreach (Transform t in playerField.transform)
         {

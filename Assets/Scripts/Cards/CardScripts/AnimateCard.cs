@@ -36,22 +36,15 @@ public class AnimateCard : NetworkBehaviour
         gameManager = playerManager.gameManager;
     }
 
+
     //Player Draw in 3 Parts
     public void DrawPlayerCard()
     {
-        if (GetComponent<CardBehaviour>().playerManager.openingDraw)
-        {
-            // cardAnimator.enabled = true;
-            // cardAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
-            // Invoke("DisableAnimator", 3);
-        }
-        else{
             front.gameObject.SetActive(false);
-            cardEffectIndicator.GetComponent<CardDisplay>().card = GetComponent<CardDisplay>().card;
+            cardEffectIndicator.GetComponent<CardDisplay>().card = card;
             cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
             cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
             Invoke("CompletePlayerDraw", drawClipPlayer.length);
-        }
     }
     public void CompletePlayerDraw()
     {
@@ -67,7 +60,7 @@ public class AnimateCard : NetworkBehaviour
             front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
             yield return null;
         }
-        gameManager.actionComplete = true;
+        CompleteAction();
     }
 
     //Enemy Draw in 3 Parts
@@ -79,7 +72,6 @@ public class AnimateCard : NetworkBehaviour
             back.gameObject.SetActive(false);
             cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
             Invoke("CompleteEnemyDraw", drawClipEnemy.length);
-
         }
     }
     public void CompleteEnemyDraw()
@@ -97,14 +89,14 @@ public class AnimateCard : NetworkBehaviour
             yield return null;
         }
         front.gameObject.SetActive(true);
-        gameManager.actionComplete = true;
+        CompleteAction();
     }
     //Disable animator once it's not useful
     public void DisableAnimator(){
         cardAnimator.enabled = false;
     }
 
-    //Animate Player Play Card in 4 Parts
+    //Animate Player PlayCard in 4 Parts
     public void StartPlayerPlay(){
         StartCoroutine(AnimateStartPlayerPlay());
     }
@@ -138,7 +130,8 @@ public class AnimateCard : NetworkBehaviour
             front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
             yield return null;
         }
-        StopAllCoroutines();
+        CompleteAction();
+        // StopAllCoroutines();
     }
     //Complete Enemy Play Card in 3 Steps
     public void PlayEnemyCard()
@@ -174,8 +167,10 @@ public class AnimateCard : NetworkBehaviour
             front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
             yield return null;
         }
+        CompleteAction();
     }
 
+    //Destroys card, currently in 2 parts
     public void StartDestroyCard()
     {
         GameObject cardDestroyed = Instantiate(cardDissolve, transform.position, Quaternion.identity, transform.parent);
@@ -188,7 +183,6 @@ public class AnimateCard : NetworkBehaviour
 
 
     }
-
     public IEnumerator AnimateDestroyCard(GameObject card)
     {
         float dissolveAmount = 0;
@@ -203,9 +197,15 @@ public class AnimateCard : NetworkBehaviour
             clipThreshold += .05f;
             yield return null;
         }
-            Destroy(card);
-            dissolveMat.SetFloat("DissolveAmount", 0);
-            destroyMat.SetFloat("ClipThreshold", 0);
+        Destroy(card);
+        dissolveMat.SetFloat("DissolveAmount", 0);
+        destroyMat.SetFloat("ClipThreshold", 0);
+        CompleteAction();
     }
 
+    //Placeholder function to complete actions. Will probably replace with event in the future to decouple.
+    public void CompleteAction()
+    {
+        gameManager.actionComplete = true;
+    }
 }

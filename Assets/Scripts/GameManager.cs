@@ -56,6 +56,7 @@ public class GameManager : NetworkBehaviour
         StartCoroutine(PlayActionQueue());
         
     }
+    //Maybe unnecessary
     public void ActivateActionQueue()
     {
         actionQueuePlaying = true;
@@ -70,7 +71,7 @@ public class GameManager : NetworkBehaviour
     {
         while (true)
         {
-            while (actionQueue.Count > 0 && actionQueuePlaying)
+            while (actionQueue.Count > 0)
             {
                 yield return StartCoroutine(actionQueue.Dequeue());
             }
@@ -238,7 +239,7 @@ public class GameManager : NetworkBehaviour
             }
             if (target.GetComponent<CardDisplay>().card.health <= 0)
             {
-                playerManager.DestroyCard(target);
+                playerManager.QueueDestroy(target);
             }
             if (target.GetComponent<CardDisplay>().card.shroud && target.GetComponent<NetworkIdentity>().hasAuthority)
             {
@@ -284,7 +285,7 @@ public class GameManager : NetworkBehaviour
         target.GetComponent<CardDisplay>().card.health += health;
         if (target.GetComponent<CardDisplay>().card.health < 0)
         {
-            playerManager.DestroyCard(target);
+            playerManager.QueueDestroy(target);
         }
         if (attack > 0)
         {
@@ -322,7 +323,7 @@ public class GameManager : NetworkBehaviour
         
         if (target.GetComponent<CardDisplay>().card.health <= 0)
         {
-            playerManager.DestroyCard(target);
+            playerManager.QueueDestroy(target);
         }
         target.GetComponent<CardDisplay>().SetCardProperties();
     }
