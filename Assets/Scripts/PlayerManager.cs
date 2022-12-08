@@ -323,6 +323,10 @@ public class PlayerManager : NetworkBehaviour
         }
 
     }
+    public void QueueDestroy(GameObject card)
+    {
+
+    }
     public void DestroyCard(GameObject card)
     {
         CmdDestroyCard(card);
@@ -485,6 +489,7 @@ public class PlayerManager : NetworkBehaviour
             }
             if (action == "Destroy")
             {
+                card.GetComponent<AnimateCard>().StartDestroyCard();
                 if (card.GetComponent<NetworkIdentity>().hasAuthority)
                 {
                     card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
@@ -496,7 +501,6 @@ public class PlayerManager : NetworkBehaviour
                     playerField.Remove(card);
                     card.transform.Find("Back").gameObject.SetActive(false);
                     card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
-                    card.transform.Find("HoverImage").gameObject.SetActive(false);
                     gameManager.ResetStats(card);
                     UpdatePlayerUnitCount(-1);
                 }
@@ -521,6 +525,7 @@ public class PlayerManager : NetworkBehaviour
                 this.GetComponent<Display>().DisplayVertical(playerDiscard, Display.discardOffset);
                 this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
                 this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
+
                 // StopAllCoroutines();
             }
             if (action == "Restore")
@@ -657,7 +662,7 @@ public class PlayerManager : NetworkBehaviour
             }
             else if (action == "Destroy")
             {
-                Debug.Log("!Destroy");
+                card.GetComponent<AnimateCard>().StartDestroyCard();
                 if (!card.GetComponent<NetworkIdentity>().hasAuthority)
                 {
                     card.GetComponent<CardBehaviour>().card.currentZone = "Discard";

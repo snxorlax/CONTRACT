@@ -17,6 +17,7 @@ public class CardDisplay : MonoBehaviour
     public CardArtCatalogue artCatalogue;
     public CardCatalogue cardCatalogue;
     public CardBehaviour cardBehaviour;
+    public AnimateCard animateCard;
     void OnEnable()
     {
         SetCardProperties();
@@ -138,6 +139,13 @@ public class CardDisplay : MonoBehaviour
 
             cardBehaviour = GetComponent<CardBehaviour>();
             cardBehaviour.SetCard();
+
+            if (GetComponent<AnimateCard>())
+            {
+                animateCard = GetComponent<AnimateCard>();
+                animateCard.card = card;
+
+            }
         }
     }
     public void SetBounty(int bountyNo)

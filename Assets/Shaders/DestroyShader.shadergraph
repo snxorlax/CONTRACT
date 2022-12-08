@@ -216,8 +216,8 @@
     "m_Type": "UnityEditor.Rendering.HighDefinition.ShaderGraph.SystemData",
     "m_ObjectId": "0760b6d676e44b78a971066fb7dae156",
     "m_MaterialNeedsUpdateHash": 1,
-    "m_SurfaceType": 0,
-    "m_RenderingPass": 1,
+    "m_SurfaceType": 1,
+    "m_RenderingPass": 4,
     "m_BlendMode": 0,
     "m_ZTest": 4,
     "m_ZWrite": false,
@@ -232,7 +232,7 @@
     "m_DOTSInstancing": false,
     "m_Version": 0,
     "m_FirstTimeMigrationExecuted": true,
-    "inspectorFoldoutMask": 1
+    "inspectorFoldoutMask": 10
 }
 
 {
@@ -449,7 +449,7 @@
     "m_Value": {
         "x": 0.6698113083839417,
         "y": 0.35070309042930605,
-        "z": 0.35070309042930605
+        "z": 0.3960784375667572
     },
     "m_DefaultValue": {
         "x": 0.0,
@@ -548,10 +548,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -173.0,
-            "y": 211.0,
-            "width": 0.0,
-            "height": 0.0
+            "x": -291.9999694824219,
+            "y": -0.000010728836059570313,
+            "width": 106.99999237060547,
+            "height": 33.999996185302737
         }
     },
     "m_Slots": [
@@ -668,10 +668,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -576.9999389648438,
-            "y": 382.0,
-            "width": 208.0,
-            "height": 302.0
+            "x": -500.0,
+            "y": 471.9999694824219,
+            "width": 207.99998474121095,
+            "height": 301.9999694824219
         }
     },
     "m_Slots": [
@@ -787,10 +787,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1179.0,
-            "y": 245.00001525878907,
-            "width": 208.0,
-            "height": 302.0
+            "x": -1246.9998779296875,
+            "y": 230.99998474121095,
+            "width": 207.99998474121095,
+            "height": 301.9999694824219
         }
     },
     "m_Slots": [
@@ -929,10 +929,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -1193.0,
-            "y": 632.0000610351563,
-            "width": 208.0,
-            "height": 302.0
+            "x": -1285.9998779296875,
+            "y": 672.9999389648438,
+            "width": 207.99998474121095,
+            "height": 301.9999694824219
         }
     },
     "m_Slots": [
@@ -999,7 +999,7 @@
     "m_TransparentWritesMotionVec": false,
     "m_AlphaToMask": false,
     "m_DepthOffset": false,
-    "m_TransparencyFog": true,
+    "m_TransparencyFog": false,
     "m_AlphaTestShadow": false,
     "m_BackThenFrontRendering": false,
     "m_TransparentDepthPrepass": false,
@@ -1089,10 +1089,10 @@
         "m_Expanded": true,
         "m_Position": {
             "serializedVersion": "2",
-            "x": -266.0,
-            "y": 488.0,
-            "width": 151.0,
-            "height": 34.0
+            "x": -226.0,
+            "y": 588.9999389648438,
+            "width": 150.99998474121095,
+            "height": 33.999996185302737
         }
     },
     "m_Slots": [
@@ -1232,13 +1232,13 @@
     },
     "m_Name": "ClipThreshold",
     "m_DefaultReferenceName": "Vector1_e58c42f2c20c4f34afe3f0b3b724c7a0",
-    "m_OverrideReferenceName": "",
+    "m_OverrideReferenceName": "ClipThreshold",
     "m_GeneratePropertyBlock": true,
     "m_Precision": 0,
     "overrideHLSLDeclaration": false,
     "hlslDeclarationOverride": 0,
     "m_Hidden": false,
-    "m_Value": 0.019999999552965165,
+    "m_Value": 0.07999999821186066,
     "m_FloatType": 0,
     "m_RangeValues": {
         "x": 0.0,

@@ -8,6 +8,8 @@ public class AnimateCard : NetworkBehaviour
 {
     public Transform cardEffectIndicator, front, back, mainBoard;
     public Card card;
+    //Prefab for destroying and creating
+    public GameObject cardDissolve;
     public PlayerManager playerManager;
     public GameManager gameManager;
     
@@ -33,6 +35,8 @@ public class AnimateCard : NetworkBehaviour
         playerManager = NetworkClient.connection.identity.GetComponent<PlayerManager>();
         gameManager = playerManager.gameManager;
     }
+
+    //Player Draw in 3 Parts
     public void DrawPlayerCard()
     {
         if (GetComponent<CardBehaviour>().playerManager.openingDraw)
@@ -46,32 +50,17 @@ public class AnimateCard : NetworkBehaviour
             cardEffectIndicator.GetComponent<CardDisplay>().card = GetComponent<CardDisplay>().card;
             cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
             cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
-            Invoke("CompletePlayerDrawAnimation", drawClipPlayer.length);
+            Invoke("CompletePlayerDraw", drawClipPlayer.length);
         }
     }
-    public void DrawEnemyCard()
-    {
-        if (!GetComponent<CardBehaviour>().playerManager.openingDraw)
-        {
-            front.gameObject.SetActive(false);
-            back.gameObject.SetActive(false);
-            cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
-            Invoke("CompleteEnemyDrawAnimation", drawClipEnemy.length);
-
-        }
-    }
-    public void DisableAnimator(){
-        cardAnimator.enabled = false;
-    }
-
-    public void CompletePlayerDrawAnimation()
+    public void CompletePlayerDraw()
     {
         front.gameObject.SetActive(true);
         front.position = cardEffectIndicator.position;
         front.localScale = cardEffectIndicator.localScale;
-        StartCoroutine(CompletePlayerDraw());
+        StartCoroutine(CompletePlayerDrawAnimation());
     }
-    public IEnumerator CompletePlayerDraw(){
+    public IEnumerator CompletePlayerDrawAnimation(){
         while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
         {
             front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
@@ -80,14 +69,27 @@ public class AnimateCard : NetworkBehaviour
         }
         gameManager.actionComplete = true;
     }
-    public void CompleteEnemyDrawAnimation()
+
+    //Enemy Draw in 3 Parts
+    public void DrawEnemyCard()
+    {
+        if (!GetComponent<CardBehaviour>().playerManager.openingDraw)
+        {
+            front.gameObject.SetActive(false);
+            back.gameObject.SetActive(false);
+            cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
+            Invoke("CompleteEnemyDraw", drawClipEnemy.length);
+
+        }
+    }
+    public void CompleteEnemyDraw()
     {
         back.gameObject.SetActive(true);
         back.position = cardEffectIndicator.position;
         back.localScale = cardEffectIndicator.localScale;
-        StartCoroutine(CompleteEnemyDraw());
+        StartCoroutine(CompleteEnemyDrawAnimation());
     }
-    public IEnumerator CompleteEnemyDraw(){
+    public IEnumerator CompleteEnemyDrawAnimation(){
         while (Vector2.Distance(back.localPosition, Vector2.zero) > .01f)
         {
             back.localScale = Vector3.Lerp(back.localScale, new Vector3(1,1,1), .3f);
@@ -97,10 +99,16 @@ public class AnimateCard : NetworkBehaviour
         front.gameObject.SetActive(true);
         gameManager.actionComplete = true;
     }
-    public void StartPlayerPlay(){
-        StartCoroutine(AnimatePlayerPlay());
+    //Disable animator once it's not useful
+    public void DisableAnimator(){
+        cardAnimator.enabled = false;
     }
-    public IEnumerator AnimatePlayerPlay(){
+
+    //Animate Player Play Card in 4 Parts
+    public void StartPlayerPlay(){
+        StartCoroutine(AnimateStartPlayerPlay());
+    }
+    public IEnumerator AnimateStartPlayerPlay(){
         while (Vector2.Distance(front.position, mainBoard.position)> .01f)
         {
             front.localScale = Vector3.Lerp(front.localScale, new Vector3(2.3f,2.3f,2.3f), .3f);
@@ -121,9 +129,9 @@ public class AnimateCard : NetworkBehaviour
         {
             GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
         }
-        StartCoroutine(CompleteAnimatePlayerPlay());
+        StartCoroutine(AnimateCompletePlayerPlay());
     }
-    public IEnumerator CompleteAnimatePlayerPlay(){
+    public IEnumerator AnimateCompletePlayerPlay(){
         while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
         {
             front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
@@ -132,6 +140,7 @@ public class AnimateCard : NetworkBehaviour
         }
         StopAllCoroutines();
     }
+    //Complete Enemy Play Card in 3 Steps
     public void PlayEnemyCard()
     {
         front.gameObject.SetActive(false);
@@ -166,4 +175,37 @@ public class AnimateCard : NetworkBehaviour
             yield return null;
         }
     }
+
+    public void StartDestroyCard()
+    {
+        GameObject cardDestroyed = Instantiate(cardDissolve, transform.position, Quaternion.identity, transform.parent);
+        cardDestroyed.transform.localScale = transform.localScale;
+        cardDestroyed.GetComponent<CardDisplay>().card = card;
+        cardDestroyed.GetComponent<CardDisplay>().SetCardProperties();
+        // cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material = new Material(Shader.Find("Shader Graphs/Dissolve"));
+        cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material.SetTexture("MainTexture", GetComponent<CardDisplay>().artCatalogue.cardArt[GetComponent<CardDisplay>().card.cardNo].texture);
+        StartCoroutine(AnimateDestroyCard(cardDestroyed));
+
+
+    }
+
+    public IEnumerator AnimateDestroyCard(GameObject card)
+    {
+        float dissolveAmount = 0;
+        float clipThreshold = 0;
+        Material dissolveMat = card.transform.Find("Front").Find("Art").GetComponent<Image>().material;
+        Material destroyMat = cardDissolve.transform.Find("Front").Find("CardBackground").GetComponent<Image>().material;
+        while (dissolveMat.GetFloat("DissolveAmount") < 3 )
+        {
+            dissolveMat.SetFloat("DissolveAmount", dissolveAmount);
+            destroyMat.SetFloat("ClipThreshold", clipThreshold);
+            dissolveAmount += .05f;
+            clipThreshold += .05f;
+            yield return null;
+        }
+            Destroy(card);
+            dissolveMat.SetFloat("DissolveAmount", 0);
+            destroyMat.SetFloat("ClipThreshold", 0);
+    }
+
 }

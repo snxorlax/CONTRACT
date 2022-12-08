@@ -2715,11 +2715,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a2dd63f78662c83498596de05560e99d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
   cardEffectIndicator: {fileID: 0}
   front: {fileID: 0}
   back: {fileID: 0}
   mainBoard: {fileID: 0}
   card: {fileID: 0}
+  cardDissolve: {fileID: 2801731667786642896, guid: d0991bada0e1e184890bb5573abbf088, type: 3}
+  playerManager: {fileID: 0}
+  gameManager: {fileID: 0}
   cardAnimator: {fileID: 0}
   cardIndicatorAnimator: {fileID: 0}
   drawClipPlayer: {fileID: 7400000, guid: 97a1871e1400d0941868784148c36f10, type: 2}
