@@ -22,7 +22,7 @@ public class MadfleetParagonEffect : CardEffect
     {
         foreach (GameObject obj in player.selectedUnits)
         {
-            player.QueueDestroy(obj);
+            player.DestroyCard(obj);
         }
         player.UpdateSelectedUnits(self, false);
         foreach (Transform t in playerField.transform)

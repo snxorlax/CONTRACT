@@ -16,6 +16,8 @@ public class PlayerManager : NetworkBehaviour
     public Queue<IEnumerator> actionQueue;
     //Action Queue Bool
     public bool actionComplete = false;
+    //List of objects waiting to be destroyed;
+    public List<GameObject> destroyQueue = new List<GameObject>();
     //Work in Progress Lists
     public List<GameObject> playerHand = new List<GameObject>();
     public List<GameObject> enemyHand = new List<GameObject>();
@@ -173,7 +175,6 @@ public class PlayerManager : NetworkBehaviour
     public void StartTurn()
     {
         Debug.Log("StartTurn");
-        ActivateDrawAnimation();
         //reset blade counter
         blade = 0;
         foreach (GameObject g in playerField)
@@ -188,22 +189,6 @@ public class PlayerManager : NetworkBehaviour
                     currentEffect[0].transform.Find("Indicator").GetComponent<Image>().color = Color.blue;
                 }
             }
-            
-        }
-    }
-    public void ActivateDrawAnimation(){
-        CmdActivateDrawAnimation();
-    }
-    [Command(requiresAuthority = false)]
-    public void CmdActivateDrawAnimation(){
-        RpcActivateDrawAnimation();
-    }
-    [ClientRpc]
-    public void RpcActivateDrawAnimation()
-    {
-        foreach (PlayerManager p in gameManager.players)
-        {
-            p.openingDraw = false;
         }
     }
     public void ChangeTurn()
@@ -222,7 +207,7 @@ public class PlayerManager : NetworkBehaviour
             isTurn = true;
             if (gameManager.turnNumber > 0)
             {
-                QueueDraw(2);
+                DrawCard(2);
                 gameManager.ActivateActionQueue();
             }
             UpdateSummonAndAttacks();
@@ -238,30 +223,15 @@ public class PlayerManager : NetworkBehaviour
         gameManager.players.Add(GetComponent<PlayerManager>());
 
     }
-    //Adds Draw to Action Queue
-    public void QueueDraw(int num)
+    //Draw Card Function
+    public void DrawCard(int num)
     {
         for (int i = 0; i < num; i++)
         {
-            actionQueue.Enqueue(DrawCard());
+            CmdDrawCard();
         }
     }
-    //Coroutine for drawing. In order to start, it will be added to the Action Queue
-    public IEnumerator DrawCard()
-    {
-        //Reset bools to false to begin coroutine
-        actionComplete = false;
-        gameManager.actionComplete = false;
-        //Activate Draw Effect
-        CmdDrawCard();
-        //Wait for animation to finish and set GameManager's actionComplete to true
-        while (!actionComplete)
-        {
-            actionComplete = gameManager.actionComplete;
-            yield return null;
-        }
-    }
-    [Command(requiresAuthority = false)]
+    [Command(requiresAuthority= false)]
     public void CmdDrawCard()
     {
         //generates a random number in the range of deck count
@@ -277,6 +247,53 @@ public class PlayerManager : NetworkBehaviour
         //Calls a remote procedure call to determine the card's parent object, and which lists it will be added to
         FormatCards(newCard, cardInstance.cardNo, "Draw");
     }
+    //Coroutine for drawing. In order to start, it will be added to the Action Queue
+    public IEnumerator DrawCardPlayer(GameObject card, int cardNo)
+    {
+        //Reset bools to false to begin coroutine
+        actionComplete = false;
+        gameManager.actionComplete = false;
+
+        //Draw Card Player
+        card.GetComponent<CardDisplay>().card.currentZone = "Hand";
+        card.transform.SetParent(playerHandArea.transform, false);
+        playerDeck.Remove(card.GetComponent<CardDisplay>().cardCatalogue.CardList[cardNo]);
+        UpdateDeckCount();
+        playerHand.Add(card);
+        card.GetComponent<AnimateCard>().DrawPlayerCard();
+        GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
+
+        //Wait for animation to finish and set GameManager's actionComplete to true
+        while (!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
+    }
+    public IEnumerator DrawCardEnemy(GameObject card, int cardNo)
+    {
+        //Reset bools to false to begin coroutine
+        actionComplete = false;
+        gameManager.actionComplete = false;
+
+        //Draw Card Enemy
+        card.transform.SetParent(enemyHandArea.transform, false);
+        card.transform.rotation = Quaternion.Euler(0, 0, -180);
+        card.transform.Find("Back").gameObject.SetActive(true);
+        playerDeck.Remove(card.GetComponent<CardDisplay>().cardCatalogue.CardList[cardNo]);
+        UpdateDeckCount();
+        enemyHand.Add(card);
+        card.GetComponent<AnimateCard>().DrawEnemyCard();
+        this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.enemyHandOffset);
+
+        //Wait for animation to finish and set GameManager's actionComplete to true
+        while (!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
+    }
+    [Command(requiresAuthority = false)]
     //Called to refresh deck count number
     public void UpdateDeckCount()
     {
@@ -305,23 +322,10 @@ public class PlayerManager : NetworkBehaviour
             }
         }
     }
-    //Adds PlayCard to Action Queue
-    public void QueuePlay(GameObject card, bool shroud)
+    //Play Card Function
+    public void PlayCard(GameObject card, bool shroud)
     {
-        actionQueue.Enqueue(PlayCard(card, shroud));
-    }
-    public IEnumerator PlayCard(GameObject card, bool shroud)
-    {
-        //Must make both bools false to ensure coroutine completes before next one is activated
-        actionComplete = false;
-        gameManager.actionComplete = false;
         CmdPlayCard(card, shroud);
-        // Waits until action is complete and the Gamemanager's actionComplete bool is true;
-        while (!actionComplete)
-        {
-            actionComplete = gameManager.actionComplete;
-            yield return null;
-        }
     }
     [Command]
     public void CmdPlayCard(GameObject card, bool shroud)
@@ -336,18 +340,114 @@ public class PlayerManager : NetworkBehaviour
         }
 
     }
-    //Adds DestroyCard to Action Queue
-    public void QueueDestroy(GameObject card)
-    {
-        actionQueue.Enqueue(DestroyCard(card));
-    }
-    //Coroutine for Destroying. Must be addeed to Action Queue to activate. Might be better implementation to handle simultaneous destruction.
-    public IEnumerator DestroyCard(GameObject card)
+    //Action Queue Coroutine
+    public IEnumerator PlayCardPlayer(GameObject card, int shroudNum)
     {
         //Must make both bools false to ensure coroutine completes before next one is activated
         actionComplete = false;
         gameManager.actionComplete = false;
-        CmdDestroyCard(card);
+        //Play Player Card
+        card.GetComponent<CardBehaviour>().SetCard();
+        if (shroudNum == 0)
+        {
+            gameManager.OnPlay?.Invoke(card.GetComponent<CardDisplay>().card);
+        }
+        switch (card.GetComponent<CardDisplay>().card.cardType)
+        {
+            case Card.CardType.Henchman:
+                card.transform.SetParent(playerFieldArea.transform, false);
+                playerField.Add(card);
+                UpdatePlayerUnitCount(1);
+                this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
+                hasSummon = false;
+                break;
+            case Card.CardType.VillainousArt:
+                card.transform.SetParent(playerUtilityArea.transform, false);
+                playerUtility.Add(card);
+                this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
+                break;
+            case Card.CardType.Relic:
+                card.transform.SetParent(playerUtilityArea.transform, false);
+                playerUtility.Add(card);
+                this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
+                break;
+            case Card.CardType.Villain:
+                Debug.Log("Play Villain");
+                card.transform.SetParent(playerFieldArea.transform, false);
+                playerField.Add(card);
+                UpdatePlayerUnitCount(1);
+                this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
+                break;
+        }
+        card.GetComponent<CardDisplay>().card.currentZone = "Field";
+        if (shroudNum == 1)
+        {
+            card.transform.Find("Back").gameObject.SetActive(true);
+            card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = true;
+            card.GetComponent<CardDisplay>().card.shroud = true;
+            card.GetComponent<CardDisplay>().SetCardProperties();
+            //Placeholder until shroud animation is ready
+            gameManager.actionComplete = true;
+
+        }
+        playerHand.Remove(card);
+        this.GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
+        card.GetComponent<AnimateCard>().StartPlayerPlay();
+        // Waits until action is complete and the gameManager's actionComplete bool is true;
+        while (!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
+    }
+    // Action Queue Coroutine
+    public IEnumerator PlayCardEnemy(GameObject card, int shroudNum)
+    {
+        //Must make both bools false to ensure coroutine completes before next one is activated
+        actionComplete = false;
+        gameManager.actionComplete = false;
+
+        //Play Enemy Card
+        GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
+        card.GetComponent<CardDisplay>().card.currentZone = "Field";
+        if (shroudNum != 1)
+        {
+            card.GetComponent<AnimateCard>().PlayEnemyCard();
+        }
+        switch (card.GetComponent<CardDisplay>().card.cardType)
+        {
+            case Card.CardType.Henchman:
+                card.transform.SetParent(enemyFieldArea.transform, false);
+                enemyField.Add(card);
+                this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
+                break;
+            case Card.CardType.VillainousArt:
+                card.transform.SetParent(enemyUtilityArea.transform, false);
+                enemyUtility.Add(card);
+                this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
+                break;
+            case Card.CardType.Relic:
+                card.transform.SetParent(enemyUtilityArea.transform, false);
+                enemyUtility.Add(card);
+                this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
+                break;
+            case Card.CardType.Villain:
+                card.transform.SetParent(enemyFieldArea.transform, false);
+                enemyField.Add(card);
+                this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
+                break;
+        }
+        if (shroudNum == 1)
+        {
+            card.GetComponent<CardDisplay>().card.shroud = true;
+            card.transform.Find("Back").gameObject.SetActive(true);
+            card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = true;
+            //Placeholder until shroud animation is ready
+            gameManager.actionComplete = true;
+        }
+        enemyHand.Remove(card);
+        this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.handOffset);
+
         // Waits until action is complete and the Gamemanager's actionComplete bool is true;
         while (!actionComplete)
         {
@@ -355,10 +455,143 @@ public class PlayerManager : NetworkBehaviour
             yield return null;
         }
     }
+    //Destroy Card Function
+    public void DestroyCard(GameObject card)
+    {
+        CmdDestroyCard(card);
+    }
     [Command(requiresAuthority = false)]
     public void CmdDestroyCard(GameObject card)
     {
         FormatCards(card, 0, "Destroy");
+    }
+    //Coroutine for Destroying. Must be addeed to Action Queue to activate. Might be better implementation to handle simultaneous destruction.
+    public IEnumerator DestroyBatchPlayer()
+    {
+        Debug.Log(destroyQueue.Count);
+        //Must make both bools false to ensure coroutine completes before next one is activated
+        actionComplete = false;
+        gameManager.actionComplete = false;
+        for (int i = 0; i < destroyQueue.Count; i++)
+        {
+            GameObject card = destroyQueue[i];
+            card.GetComponent<AnimateCard>().StartDestroyCard();
+            card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
+            if (card.GetComponent<NetworkIdentity>().hasAuthority)
+            {
+                card.transform.SetParent(playerDiscardArea.transform, false);
+                playerDiscard.Add(card);
+            }
+            else
+            {
+                card.transform.SetParent(enemyDiscardArea.transform, false);
+                enemyDiscard.Add(card);
+            }
+            if (playerField.Contains(card))
+            {
+                playerField.Remove(card);
+                card.transform.Find("Back").gameObject.SetActive(false);
+                card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
+                card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
+                UpdatePlayerUnitCount(-1);
+            }
+            else if (playerUtility.Contains(card))
+            {
+                playerUtility.Remove(card);
+            }
+            foreach (PlayerManager p in gameManager.players)
+            {
+                if (p.enemyField.Contains(card))
+                {
+                    p.enemyField.Remove(card);
+                    this.GetComponent<Display>().DisplayHorizontal(p.enemyField, Display.fieldOffset);
+                }
+                else if (p.enemyUtility.Contains(card))
+                {
+                    p.enemyUtility.Remove(card);
+                    this.GetComponent<Display>().DisplayHorizontal(p.enemyUtility, Display.fieldOffset);
+                }
+            }
+            this.GetComponent<Display>().DisplayVertical(playerDiscard, Display.discardOffset);
+            this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
+            this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
+
+        }
+        destroyQueue.Clear();
+        // Waits until action is complete and the Gamemanager's actionComplete bool is true;
+        while (destroyQueue.Count > 0)
+        {
+            yield return null;
+        }
+    }
+    public IEnumerator DestroyBatchEnemy()
+    {
+        //Must make both bools false to ensure coroutine completes before next one is activated
+        actionComplete = false;
+        gameManager.actionComplete = false;
+        for (int i = 0; i < destroyQueue.Count; i++)
+        {
+            GameObject card = destroyQueue[i];
+            card.GetComponent<AnimateCard>().StartDestroyCard();
+            if (!card.GetComponent<NetworkIdentity>().hasAuthority)
+            {
+                card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
+                card.transform.SetParent(enemyDiscardArea.transform, false);
+                enemyDiscard.Add(card);
+            }
+            else if (card.GetComponent<NetworkIdentity>().hasAuthority)
+            {
+                card.transform.SetParent(playerDiscardArea.transform, false);
+                playerDiscard.Add(card);
+            }
+            if (playerField.Contains(card))
+            {
+                playerField.Remove(card);
+                card.transform.Find("Back").gameObject.SetActive(false);
+                card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
+                card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
+                gameManager.ResetStats(card);
+                UpdatePlayerUnitCount(-1);
+            }
+            else if (playerUtility.Contains(card))
+            {
+                playerUtility.Remove(card);
+            }
+            foreach (PlayerManager p in gameManager.players)
+            {
+                if (p.enemyField.Contains(card))
+                {
+                    card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
+                    card.transform.SetParent(enemyDiscardArea.transform, false);
+                    p.enemyField.Remove(card);
+                    this.GetComponent<Display>().DisplayHorizontal(p.enemyField, Display.fieldOffset);
+                    this.GetComponent<Display>().DisplayHorizontal(p.enemyDiscard, Display.fieldOffset);
+                    Debug.Log("!destroyingfield");
+                    // this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
+                    card.transform.Find("Back").gameObject.SetActive(false);
+                    card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
+                    card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
+                    card.transform.Find("HoverImage").gameObject.SetActive(false);
+                }
+                else if (p.enemyUtility.Contains(card))
+                {
+                    card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
+                    card.transform.SetParent(enemyDiscardArea.transform, false);
+                    p.enemyUtility.Remove(card);
+                    this.GetComponent<Display>().DisplayHorizontal(p.enemyUtility, Display.fieldOffset);
+                    this.GetComponent<Display>().DisplayHorizontal(p.enemyDiscard, Display.fieldOffset);
+                    // this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
+                }
+            }
+            this.GetComponent<Display>().DisplayHorizontal(enemyDiscard, Display.fieldOffset);
+
+        }
+        destroyQueue.Clear();
+        // Waits until action is complete and the Gamemanager's actionComplete bool is true;
+        while (destroyQueue.Count > 0)
+        {
+            yield return null;
+        }
     }
     public void RestoreCard(GameObject card)
     {
@@ -436,17 +669,10 @@ public class PlayerManager : NetworkBehaviour
     [ClientRpc]
     private void FormatCards(GameObject card, int num, string action)
     {
-        if (action == "Draw")
+        if (action == "Draw" || action == "Create")
         {
             card.GetComponent<CardDisplay>().card = Instantiate(card.GetComponent<CardDisplay>().cardCatalogue.CardList[num]);
-            if (card.GetComponent<CardDisplay>().card.cardEffect)
-            {
-                card.GetComponent<CardDisplay>().card.cardEffect = Instantiate(card.GetComponent<CardDisplay>().card.cardEffect);
-            }
-        }
-        if (action == "Create")
-        {
-            card.GetComponent<CardDisplay>().card = Instantiate(card.GetComponent<CardDisplay>().cardCatalogue.CardList[num]);
+            card.GetComponent<CardDisplay>().card.cardEffect = Instantiate(card.GetComponent<CardDisplay>().card.cardEffect);
         }
         card.GetComponent<CardDisplay>().card.cardEffect.self = card;
         card.GetComponent<CardDisplay>().card.cardEffect.CardSetup();
@@ -455,103 +681,19 @@ public class PlayerManager : NetworkBehaviour
         {
             if (action == "Draw")
             {
-                card.GetComponent<CardDisplay>().card.currentZone = "Hand";
-                card.transform.SetParent(playerHandArea.transform, false);
-                playerDeck.Remove(card.GetComponent<CardDisplay>().cardCatalogue.CardList[num]);
-                UpdateDeckCount();
-                playerHand.Add(card);
-                card.GetComponent<AnimateCard>().DrawPlayerCard();
-                GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
+                actionQueue.Enqueue(DrawCardPlayer(card, num));
             }
             if (action == "Play")
             {
-                card.GetComponent<CardBehaviour>().SetCard();
-                if (num == 0)
-                {
-                    gameManager.OnPlay?.Invoke(card.GetComponent<CardDisplay>().card);
-                }
-                switch (card.GetComponent<CardDisplay>().card.cardType)
-                {
-                    case Card.CardType.Henchman:
-                        card.transform.SetParent(playerFieldArea.transform, false);
-                        playerField.Add(card);
-                        UpdatePlayerUnitCount(1);
-                        this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
-                        hasSummon = false;
-                        break;
-                    case Card.CardType.VillainousArt:
-                        card.transform.SetParent(playerUtilityArea.transform, false);
-                        playerUtility.Add(card);
-                        this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
-                        break;
-                    case Card.CardType.Relic:
-                        card.transform.SetParent(playerUtilityArea.transform, false);
-                        playerUtility.Add(card);
-                        this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
-                        break;
-                    case Card.CardType.Villain:
-                        Debug.Log("Play Villain");
-                        card.transform.SetParent(playerFieldArea.transform, false);
-                        playerField.Add(card);
-                        UpdatePlayerUnitCount(1);
-                        this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
-                        break;
-                }
-                card.GetComponent<CardDisplay>().card.currentZone = "Field";
-                if (num == 1)
-                {
-                    card.transform.Find("Back").gameObject.SetActive(true);
-                    card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = true;
-                    card.GetComponent<CardDisplay>().card.shroud = true;
-                    card.GetComponent<CardDisplay>().SetCardProperties();
-                    card.GetComponent<CardBehaviour>().SetCard();
-
-                }
-                playerHand.Remove(card);
-                this.GetComponent<Display>().DisplayHorizontal(playerHand, Display.handOffset);
-                card.GetComponent<AnimateCard>().StartPlayerPlay();
+                actionQueue.Enqueue(PlayCardPlayer(card, num));
             }
             if (action == "Destroy")
             {
-                card.GetComponent<AnimateCard>().StartDestroyCard();
-                if (card.GetComponent<NetworkIdentity>().hasAuthority)
+                destroyQueue.Add(card);
+                if (!actionQueue.Contains(DestroyBatchPlayer()))
                 {
-                    card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
-                    card.transform.SetParent(playerDiscardArea.transform, false);
-                    playerDiscard.Add(card);
+                    actionQueue.Enqueue(DestroyBatchPlayer());
                 }
-                if (playerField.Contains(card))
-                {
-                    playerField.Remove(card);
-                    card.transform.Find("Back").gameObject.SetActive(false);
-                    card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
-                    card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
-                    gameManager.ResetStats(card);
-                    UpdatePlayerUnitCount(-1);
-                }
-                else if (playerUtility.Contains(card))
-                {
-                    playerUtility.Remove(card);
-                }
-                foreach (PlayerManager p in gameManager.players)
-                {
-                    if (p.enemyField.Contains(card))
-                    {
-                        p.enemyField.Remove(card);
-                        this.GetComponent<Display>().DisplayHorizontal(p.enemyField, Display.fieldOffset);
-                    }
-                    else if (p.enemyUtility.Contains(card))
-                    {
-                        Debug.Log("Test");
-                        p.enemyUtility.Remove(card);
-                        this.GetComponent<Display>().DisplayHorizontal(p.enemyUtility, Display.fieldOffset);
-                    }
-                }
-                this.GetComponent<Display>().DisplayVertical(playerDiscard, Display.discardOffset);
-                this.GetComponent<Display>().DisplayHorizontal(playerField, Display.fieldOffset);
-                this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
-
-                // StopAllCoroutines();
             }
             if (action == "Restore")
             {
@@ -633,96 +775,21 @@ public class PlayerManager : NetworkBehaviour
         }
         else if (!hasAuthority)
         {
-            // Debug.Log(action);
             if (action == "Draw")
             {
-                card.transform.SetParent(enemyHandArea.transform, false);
-                card.transform.rotation = Quaternion.Euler(0, 0, -180);
-                card.transform.Find("Back").gameObject.SetActive(true);
-                playerDeck.Remove(card.GetComponent<CardDisplay>().cardCatalogue.CardList[num]);
-                UpdateDeckCount();
-                enemyHand.Add(card);
-                card.GetComponent<AnimateCard>().DrawEnemyCard();
-                this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.enemyHandOffset);
+                actionQueue.Enqueue(DrawCardEnemy(card, num));
             }
             else if (action == "Play")
             {
-                GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
-                card.GetComponent<CardDisplay>().card.currentZone = "Field";
-                if (num != 1)
-                {
-                    card.GetComponent<AnimateCard>().PlayEnemyCard();
-                }
-                switch (card.GetComponent<CardDisplay>().card.cardType)
-                {
-                    case Card.CardType.Henchman:
-                        card.transform.SetParent(enemyFieldArea.transform, false);
-                        enemyField.Add(card);
-                        this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
-                        break;
-                    case Card.CardType.VillainousArt:
-                        card.transform.SetParent(enemyUtilityArea.transform, false);
-                        enemyUtility.Add(card);
-                        this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
-                        break;
-                    case Card.CardType.Relic:
-                        card.transform.SetParent(enemyUtilityArea.transform, false);
-                        enemyUtility.Add(card);
-                        this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
-                        break;
-                    case Card.CardType.Villain:
-                        card.transform.SetParent(enemyFieldArea.transform, false);
-                        enemyField.Add(card);
-                        this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
-                        break;
-                }
-                if (num == 1)
-                {
-                    card.GetComponent<CardDisplay>().card.shroud = true;
-                    card.transform.Find("Back").gameObject.SetActive(true);
-                    card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = true;
-                }
-                enemyHand.Remove(card);
-                this.GetComponent<Display>().DisplayHorizontal(enemyHand, Display.handOffset);
+                actionQueue.Enqueue(PlayCardEnemy(card, num));
             }
             else if (action == "Destroy")
             {
-                card.GetComponent<AnimateCard>().StartDestroyCard();
-                if (!card.GetComponent<NetworkIdentity>().hasAuthority)
+                destroyQueue.Add(card);
+                if (!actionQueue.Contains(DestroyBatchEnemy()))
                 {
-                    card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
-                    card.transform.SetParent(enemyDiscardArea.transform, false);
-                    enemyDiscard.Add(card);
-                    Debug.Log("!adding");
+                    actionQueue.Enqueue(DestroyBatchEnemy());
                 }
-                foreach (PlayerManager p in gameManager.players)
-                {
-                    if (p.enemyField.Contains(card))
-                    {
-                        card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
-                        card.transform.SetParent(enemyDiscardArea.transform, false);
-                        p.enemyField.Remove(card);
-                        this.GetComponent<Display>().DisplayHorizontal(p.enemyField, Display.fieldOffset);
-                        this.GetComponent<Display>().DisplayHorizontal(p.enemyDiscard, Display.fieldOffset);
-                        Debug.Log("!destroyingfield");
-                        // this.GetComponent<Display>().DisplayHorizontal(enemyField, Display.fieldOffset);
-                        card.transform.Find("Back").gameObject.SetActive(false);
-                        card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
-                        card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
-                        card.transform.Find("HoverImage").gameObject.SetActive(false);
-                        gameManager.ResetStats(card);
-                    }
-                    else if (p.enemyUtility.Contains(card))
-                    {
-                        card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
-                        card.transform.SetParent(enemyDiscardArea.transform, false);
-                        p.enemyUtility.Remove(card);
-                        this.GetComponent<Display>().DisplayHorizontal(p.enemyUtility, Display.fieldOffset);
-                        this.GetComponent<Display>().DisplayHorizontal(p.enemyDiscard, Display.fieldOffset);
-                        // this.GetComponent<Display>().DisplayHorizontal(enemyUtility, Display.fieldOffset);
-                    }
-                }
-                this.GetComponent<Display>().DisplayHorizontal(enemyDiscard, Display.fieldOffset);
             }
             else if (action == "Restore")
             {
@@ -803,6 +870,57 @@ public class PlayerManager : NetworkBehaviour
                 GetComponent<Display>().DisplayHorizontal(enemyHand, Display.handOffset);
             }
 
+        }
+    }
+    //Calls command
+    public void Combat(GameObject attacker, GameObject defender)
+    {
+        CmdCombat(attacker, defender);
+    }
+    [Command(requiresAuthority = false)]
+    public void CmdCombat(GameObject attacker, GameObject defender)
+    {
+        RpcCombat(attacker, defender);
+        gameManager.Damage(defender, attacker.GetComponent<CardDisplay>().card.attack);
+        if (defender.GetComponent<CardDisplay>())
+        {
+            gameManager.Damage(attacker, defender.GetComponent<CardDisplay>().card.attack);
+        }
+    }
+    [ClientRpc]
+    //Enqueues actions to separate rpcs
+    public void RpcCombat(GameObject attacker, GameObject defender)
+    {
+        if (attacker.GetComponent<NetworkIdentity>().hasAuthority)
+        {
+            actionQueue.Enqueue(PlayerCombat(attacker, defender));
+        }
+        else if (!attacker.GetComponent<NetworkIdentity>().hasAuthority)
+        {
+            actionQueue.Enqueue(EnemyCombat(attacker, defender));
+
+        }
+    }
+    public IEnumerator PlayerCombat(GameObject attacker, GameObject defender)
+    {
+        actionComplete = false;
+        gameManager.actionComplete = false;
+        attacker.GetComponent<AnimateCard>().StartAttack(attacker, defender);
+        while(!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
+        }
+    }
+    public IEnumerator EnemyCombat(GameObject attacker, GameObject defender)
+    {
+        actionComplete = false;
+        gameManager.actionComplete = false;
+        attacker.GetComponent<AnimateCard>().StartAttack(attacker, defender);
+        while(!actionComplete)
+        {
+            actionComplete = gameManager.actionComplete;
+            yield return null;
         }
     }
 }

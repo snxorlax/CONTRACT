@@ -21,8 +21,8 @@ public class DreamVialEffect : CardEffect
     public override void Effect1(GameObject target)
     {
         player.ReturnCard(target);
-        player.QueueDraw(1);
-        player.QueueDestroy(self);
+        player.DrawCard(1);
+        player.DestroyCard(self);
         base.Effect1(target);
         foreach (Transform t in playerField.transform)
         {

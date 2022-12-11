@@ -2592,6 +2592,7 @@ MonoBehaviour:
   artCatalogue: {fileID: 11400000, guid: 4b7527332322e2c40a55ae7774caefd4, type: 2}
   cardCatalogue: {fileID: 11400000, guid: 1b1c1f1b9fc275a46a2be3d45d5e555f, type: 2}
   cardBehaviour: {fileID: 0}
+  animateCard: {fileID: 0}
 --- !u!114 &587298080017563492
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2723,6 +2724,7 @@ MonoBehaviour:
   mainBoard: {fileID: 0}
   card: {fileID: 0}
   cardDissolve: {fileID: 2801731667786642896, guid: d0991bada0e1e184890bb5573abbf088, type: 3}
+  artDissolve: {fileID: 2100000, guid: 7c32e00f314aa0a42bba63dae40e8cc4, type: 2}
   playerManager: {fileID: 0}
   gameManager: {fileID: 0}
   cardAnimator: {fileID: 0}
@@ -8804,6 +8806,7 @@ MonoBehaviour:
   artCatalogue: {fileID: 11400000, guid: 4b7527332322e2c40a55ae7774caefd4, type: 2}
   cardCatalogue: {fileID: 11400000, guid: 1b1c1f1b9fc275a46a2be3d45d5e555f, type: 2}
   cardBehaviour: {fileID: 0}
+  animateCard: {fileID: 0}
 --- !u!1 &6474171388129861718
 GameObject:
   m_ObjectHideFlags: 0

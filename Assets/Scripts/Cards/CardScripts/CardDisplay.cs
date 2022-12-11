@@ -85,12 +85,16 @@ public class CardDisplay : MonoBehaviour
                     frameMain.color = relicColors[1];
                     frameInner.color = relicColors[2];
                     frameShadow.color = relicColors[3];
+                    statBox.gameObject.SetActive(false);
+                    statBoxField.gameObject.SetActive(false);
                     break;
                 case Card.CardType.VillainousArt:    
                     frameOuter.color = vaColors[0];
                     frameMain.color = vaColors[1];
                     frameInner.color = vaColors[2];
                     frameShadow.color = vaColors[3];
+                    statBox.gameObject.SetActive(false);
+                    statBoxField.gameObject.SetActive(false);
                     break;
                 case Card.CardType.Villain:
                     frameOuter.color = villainColors[0];
@@ -110,14 +114,6 @@ public class CardDisplay : MonoBehaviour
                     frameShadow.color = calamityColors[3];
                     SetBounty(card.bounty);
                     break;
-                
-
-            }
-
-            if (card.cardType != Card.CardType.Henchman && card.cardType!= Card.CardType.Villain && card.cardType != Card.CardType.Calamity)
-            {
-               statBox.gameObject.SetActive(false);
-               statBoxField.gameObject.SetActive(false);
             }
             if (card.currentZone != "Field")
             {
@@ -144,7 +140,6 @@ public class CardDisplay : MonoBehaviour
             {
                 animateCard = GetComponent<AnimateCard>();
                 animateCard.card = card;
-
             }
         }
     }

@@ -16,6 +16,7 @@ MonoBehaviour:
   cardType: 2
   artColor: {r: 0.29411766, g: 0.29411766, b: 0.29411766, a: 1}
   attack: 0
+  originalAttack: 0
   health: 0
   originalHealth: 0
   bounty: 0
@@ -25,7 +26,7 @@ MonoBehaviour:
   cardText: 'Sacrifice: Return an allied unit to your hand. Draw 1.'
   cardEffect: {fileID: 11400000, guid: dd1e384e610fb4641ae181d6dcb75c58, type: 2}
   activatedEffectText:
-  - Return an allied unit to its owner's hand. Draw 1.
+  - 'Sacrifice: Return an allied unit to its owner''s hand. Draw 1.'
   deathWalkText: 
   deathWalk: 0
   creations: []

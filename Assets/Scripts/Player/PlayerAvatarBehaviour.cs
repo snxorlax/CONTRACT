@@ -60,7 +60,7 @@ public class PlayerAvatarBehaviour : NetworkBehaviour, IDropHandler, IPointerEnt
                 }
                 if (tempSpell.GetComponent<CardDisplay>().card.cardType == Card.CardType.VillainousArt)
                 {
-                    player.QueueDestroy(tempSpell);
+                    player.DestroyCard(tempSpell);
                 }
                 effectSelectable = false;
 
@@ -79,7 +79,7 @@ public class PlayerAvatarBehaviour : NetworkBehaviour, IDropHandler, IPointerEnt
         {
             if (pointerEventData.pointerDrag.GetComponent<CardBehaviour>().isTargeting && gameManager.turnNumber > 1)
             {
-                gameManager.Combat(pointerEventData.pointerDrag, gameObject);
+                player.Combat(pointerEventData.pointerDrag, gameObject);
                 pointerEventData.pointerDrag.GetComponent<CardBehaviour>().canAttack = false;
             }
 

@@ -10,6 +10,8 @@ public class AnimateCard : NetworkBehaviour
     public Card card;
     //Prefab for destroying and creating
     public GameObject cardDissolve;
+    //Material for instantiating different dissolving art
+    public Material artDissolve;
     public PlayerManager playerManager;
     public GameManager gameManager;
     
@@ -40,11 +42,11 @@ public class AnimateCard : NetworkBehaviour
     //Player Draw in 3 Parts
     public void DrawPlayerCard()
     {
-            front.gameObject.SetActive(false);
-            cardEffectIndicator.GetComponent<CardDisplay>().card = card;
-            cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
-            cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
-            Invoke("CompletePlayerDraw", drawClipPlayer.length);
+        front.gameObject.SetActive(false);
+        cardEffectIndicator.GetComponent<CardDisplay>().card = card;
+        cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
+        cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
+        Invoke("CompletePlayerDraw", drawClipPlayer.length);
     }
     public void CompletePlayerDraw()
     {
@@ -66,13 +68,10 @@ public class AnimateCard : NetworkBehaviour
     //Enemy Draw in 3 Parts
     public void DrawEnemyCard()
     {
-        if (!GetComponent<CardBehaviour>().playerManager.openingDraw)
-        {
-            front.gameObject.SetActive(false);
-            back.gameObject.SetActive(false);
-            cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
-            Invoke("CompleteEnemyDraw", drawClipEnemy.length);
-        }
+        front.gameObject.SetActive(false);
+        back.gameObject.SetActive(false);
+        cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
+        Invoke("CompleteEnemyDraw", drawClipEnemy.length);
     }
     public void CompleteEnemyDraw()
     {
@@ -177,11 +176,9 @@ public class AnimateCard : NetworkBehaviour
         cardDestroyed.transform.localScale = transform.localScale;
         cardDestroyed.GetComponent<CardDisplay>().card = card;
         cardDestroyed.GetComponent<CardDisplay>().SetCardProperties();
-        // cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material = new Material(Shader.Find("Shader Graphs/Dissolve"));
+        cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material = new Material(artDissolve);
         cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material.SetTexture("MainTexture", GetComponent<CardDisplay>().artCatalogue.cardArt[GetComponent<CardDisplay>().card.cardNo].texture);
         StartCoroutine(AnimateDestroyCard(cardDestroyed));
-
-
     }
     public IEnumerator AnimateDestroyCard(GameObject card)
     {
@@ -200,6 +197,31 @@ public class AnimateCard : NetworkBehaviour
         Destroy(card);
         dissolveMat.SetFloat("DissolveAmount", 0);
         destroyMat.SetFloat("ClipThreshold", 0);
+        gameManager.ResetStats(gameObject);
+    }
+    public void StartAttack(GameObject attacker, GameObject defender)
+    {
+        StartCoroutine(AttackAnimation(attacker, defender));
+    }
+
+    public IEnumerator AttackAnimation(GameObject attacker, GameObject defender)
+    {
+        Vector2 originalPos = attacker.transform.position;
+        for (int i = 0; i < 10; i++)
+        {
+            attacker.transform.position = Vector2.Lerp(attacker.transform.position, defender.transform.position, .025f);
+
+            yield return null;
+        }
+        StartCoroutine(ResetAttacker(attacker, originalPos));
+    }
+    public IEnumerator ResetAttacker(GameObject attacker, Vector2 originalPos)
+    {
+        while (Vector2.Distance((Vector2)attacker.transform.position, originalPos) > .01f && attacker.GetComponent<CardDisplay>().card.currentZone == "Field")
+        {
+            attacker.transform.position = Vector2.Lerp(attacker.transform.position, originalPos, .02f);
+            yield return null;
+        }
         CompleteAction();
     }
 

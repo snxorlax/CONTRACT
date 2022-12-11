@@ -73,7 +73,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             if (playerManager.selectedUnits.Count == playerManager.currentContract[0].GetComponent<CardBehaviour>().card.cardEffect.contractInfo[0].amount && contractSelectable)
             {
-                // playerManager.QueuePlay(playerManager.currentContract[0], false);
+                // playerManager.PlayCard(playerManager.currentContract[0], false);
                 playerManager.currentContract[0].GetComponent<CardDisplay>().card.cardEffect.ContractEffect();
                 contractSelectable = false;
                 // DestroyUnits();
@@ -88,7 +88,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             if (playerManager.selectedRelics.Count == playerManager.currentContract[0].GetComponent<CardBehaviour>().card.cardEffect.contractInfo[0].amount && contractSelectable)
             {
-                playerManager.QueuePlay(playerManager.currentContract[0], false);
+                playerManager.PlayCard(playerManager.currentContract[0], false);
                 contractSelectable = false;
                 DestroyRelics();
                 playerManager.currentContract.Clear();
@@ -173,7 +173,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         }
         if (tempSpell.GetComponent<CardDisplay>().card.cardType == Card.CardType.VillainousArt)
         {
-            playerManager.QueueDestroy(tempSpell);
+            playerManager.DestroyCard(tempSpell);
         }
         effectSelectable = false;
 
@@ -231,7 +231,10 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 cardEffect.transform.position = mainBoard.transform.position;
                 cardEffect.transform.localScale *= 3.7f;
                 playerDisplay.DisplayHorizontal(GetComponent<CardDisplay>().activatedEffects, Display.effectOffset);
+                //Enables background
                 cardEffect.transform.GetChild(0).gameObject.SetActive(true);
+                //Enables first effect
+                cardEffect.transform.GetChild(1).gameObject.SetActive(true);
             }
 
         }
@@ -262,7 +265,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 if (card.cardType == Card.CardType.Villain)
                 {
                     card.cardEffect.Contract();
-                    // playerManager.QueuePlay(gameObject, false);
+                    // playerManager.PlayCard(gameObject, false);
                 }
                     if (card.cardType == Card.CardType.Henchman && !playerManager.hasSummon)
                     {
@@ -272,7 +275,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     {
                         if (pointerEventData.button == PointerEventData.InputButton.Right)
                         {
-                            playerManager.QueuePlay(gameObject, true);
+                            playerManager.PlayCard(gameObject, true);
                         }
                         else
                         {
@@ -280,7 +283,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                             {
                                 playerManager.currentEffect.Add(gameObject);
                             }
-                            playerManager.QueuePlay(gameObject, false);
+                            playerManager.PlayCard(gameObject, false);
                         }
                     }
 
@@ -293,7 +296,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     {
                         playerManager.currentEffect.Add(gameObject);
                     }
-                    playerManager.QueuePlay(gameObject, false);
+                    playerManager.PlayCard(gameObject, false);
                 }
             }
             playerDisplay.DisplayHorizontal(playerManager.playerHand, Display.handOffset);
@@ -413,7 +416,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             {
                 if (gameManager.turnNumber > 1)
                 {
-                    StartCoroutine(AttackAnimation(pointerEventData.pointerDrag));
+                    playerManager.Combat(pointerEventData.pointerDrag, gameObject);
                     pointerEventData.pointerDrag.GetComponent<CardBehaviour>().canAttack = false;
                 }
                 else if (gameManager.turnNumber <= 1)
@@ -485,7 +488,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         {
             foreach (GameObject obj in p.selectedUnits)
             {
-                p.QueueDestroy(obj);
+                p.DestroyCard(obj);
             }
         }
         playerManager.UpdateSelectedUnits(gameObject, false);
@@ -509,36 +512,12 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             foreach (GameObject obj in p.selectedRelics)
             {
                 // Debug.Log("Test");
-                p.QueueDestroy(obj);
+                p.DestroyCard(obj);
             }
         }
         playerManager.UpdateSelectedRelics(gameObject, false);
 
     }
 
-    public IEnumerator AttackAnimation(GameObject attacker)
-    {
-        attacker.transform.parent.SetSiblingIndex(11);
-        Vector2 originalPos = attacker.transform.position;
-        for (int i = 0; i < 10; i++)
-        {
-            attacker.transform.position = Vector2.Lerp(attacker.transform.position, transform.position, .02f);
-
-            yield return new WaitForSeconds(.01f);
-        }
-        StopAllCoroutines();
-        gameManager.Combat(attacker, gameObject);
-        StartCoroutine(ResetAttacker(attacker, originalPos));
-    }
-    public IEnumerator ResetAttacker(GameObject attacker, Vector2 originalPos)
-    {
-        while ((Vector2)attacker.transform.position != originalPos && attacker.GetComponent<CardDisplay>().card.currentZone == "Field")
-        {
-            attacker.transform.position = Vector2.Lerp(attacker.transform.position, originalPos, .015f);
-
-            yield return new WaitForSeconds(.01f);
-
-        }
-    }
 
 }

@@ -5983,7 +5983,7 @@ RectTransform:
   m_GameObject: {fileID: 126674161}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.1771144, y: 0.18193632, z: 0.19147503}
+  m_LocalScale: {x: 0.18065669, y: 0.18557505, z: 0.19530453}
   m_Children: []
   m_Father: {fileID: 1285452702}
   m_RootOrder: 1
@@ -6058,7 +6058,7 @@ RectTransform:
   m_GameObject: {fileID: 138478202}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.17760004, y: 0.18368658, z: 0.19147503}
+  m_LocalScale: {x: 0.182, y: 0.188, z: 0.19721928}
   m_Children: []
   m_Father: {fileID: 1285452702}
   m_RootOrder: 0
@@ -18911,7 +18911,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &670766965
 RectTransform:
   m_ObjectHideFlags: 0
@@ -44432,7 +44432,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.28155038, g: 0.3247238, b: 0.3490566, a: 1}
+  m_Color: {r: 0.3962264, g: 0.352357, b: 0.2747419, a: 1}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -45393,6 +45393,7 @@ MonoBehaviour:
   artCatalogue: {fileID: 11400000, guid: 4b7527332322e2c40a55ae7774caefd4, type: 2}
   cardCatalogue: {fileID: 11400000, guid: 1b1c1f1b9fc275a46a2be3d45d5e555f, type: 2}
   cardBehaviour: {fileID: 0}
+  animateCard: {fileID: 0}
 --- !u!114 &1538889751
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -50917,14 +50918,14 @@ RectTransform:
   m_GameObject: {fileID: 1622540896}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1.525, y: 0.3688087, z: 1.2018117}
+  m_LocalScale: {x: 1.56, y: 0.377, z: 1.237866}
   m_Children: []
   m_Father: {fileID: 1582543783}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: -0.091345, y: -0.09595108}
+  m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 100, y: 100}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1622540898
@@ -50940,7 +50941,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.0754717, g: 0.07243524, b: 0.06514774, a: 0.3764706}
+  m_Color: {r: 0, g: 0, b: 0, a: 0.3764706}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -116231,6 +116232,7 @@ MonoBehaviour:
   artCatalogue: {fileID: 11400000, guid: 4b7527332322e2c40a55ae7774caefd4, type: 2}
   cardCatalogue: {fileID: 11400000, guid: 1b1c1f1b9fc275a46a2be3d45d5e555f, type: 2}
   cardBehaviour: {fileID: 0}
+  animateCard: {fileID: 0}
 --- !u!114 &9171903567000858597
 MonoBehaviour:
   m_ObjectHideFlags: 0

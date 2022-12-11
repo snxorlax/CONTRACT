@@ -34,7 +34,7 @@ public class MadFleetScoutEffect : CardEffect
     }
     public override void Deathwalk()
     {
-        player.QueueDraw(1);
+        player.DrawCard(1);
         base.Deathwalk();
     }
 }

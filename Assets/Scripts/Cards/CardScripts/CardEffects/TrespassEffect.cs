@@ -31,7 +31,7 @@ public class TrespassEffect : CardEffect
         player.blade ++;
         gameManager.Damage(target, player.blade);
         gameManager.PlayVFX(target, "Blade");
-        player.QueueDraw(1);
+        player.DrawCard(1);
         // target.transform.Find("VFX").Find("Blade").GetComponent<ParticleSystem>().Play(true);
         foreach (Transform t in enemyField.transform)
         {

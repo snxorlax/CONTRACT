@@ -229,6 +229,10 @@ public class GameManager : NetworkBehaviour
         if (target.GetComponent<CardDisplay>())
         {
             target.GetComponent<CardDisplay>().card.health -= amount;
+            if (target.GetComponent<CardDisplay>().card.health < 0)
+            {
+                target.GetComponent<CardDisplay>().card.health = 0;
+            }
             if (amount > 0 )
             {
                 AnimateStats(target, "-" + amount);
@@ -237,13 +241,15 @@ public class GameManager : NetworkBehaviour
             {
                 AnimateStats(target, "+" + Mathf.Abs(amount));
             }
-            if (target.GetComponent<CardDisplay>().card.health <= 0)
-            {
-                playerManager.QueueDestroy(target);
-            }
-            if (target.GetComponent<CardDisplay>().card.shroud && target.GetComponent<NetworkIdentity>().hasAuthority)
+            //Activate shroud for player who controls unit if it is damaged (amount > 0)
+            //Shroud is activated before card is destroyed.
+            if (target.GetComponent<CardDisplay>().card.shroud && target.GetComponent<NetworkIdentity>().hasAuthority && amount > 0)
             {
                 target.GetComponent<CardDisplay>().card.cardEffect.Shroud();
+            }
+            if (target.GetComponent<CardDisplay>().card.health <= 0)
+            {
+                playerManager.DestroyCard(target);
             }
             target.GetComponent<CardDisplay>().SetCardProperties();
         }
@@ -285,7 +291,7 @@ public class GameManager : NetworkBehaviour
         target.GetComponent<CardDisplay>().card.health += health;
         if (target.GetComponent<CardDisplay>().card.health < 0)
         {
-            playerManager.QueueDestroy(target);
+            playerManager.DestroyCard(target);
         }
         if (attack > 0)
         {
@@ -323,7 +329,7 @@ public class GameManager : NetworkBehaviour
         
         if (target.GetComponent<CardDisplay>().card.health <= 0)
         {
-            playerManager.QueueDestroy(target);
+            playerManager.DestroyCard(target);
         }
         target.GetComponent<CardDisplay>().SetCardProperties();
     }
@@ -344,20 +350,6 @@ public class GameManager : NetworkBehaviour
         card.GetComponent<CardDisplay>().card.attack = cardInfo.originalAttack;
         card.GetComponent<CardDisplay>().card.health = cardInfo.originalHealth;
         card.transform.Find("Front").GetChild(3).gameObject.SetActive(true);
-    }
-    public void Combat(GameObject attacker, GameObject defender)
-    {
-        CmdCombat(attacker, defender);
-    }
-    [Command(requiresAuthority = false)]
-    public void CmdCombat(GameObject attacker, GameObject defender)
-    {
-        Damage(defender, attacker.GetComponent<CardDisplay>().card.attack);
-        // RpcCombat(attacker, defender);
-        if (defender.GetComponent<CardDisplay>())
-        {
-            Damage(attacker, defender.GetComponent<CardDisplay>().card.attack);
-        }
     }
 
     public void DisableZone(GameObject zone)
