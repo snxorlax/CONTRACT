@@ -18,6 +18,7 @@ public class GameManager : NetworkBehaviour
     public readonly SyncList<PlayerManager> players = new SyncList<PlayerManager>();
     [SyncVar]
     public int turnNumber;
+    public bool startGame;
     public PlayerManager playerManager;
     public PlayerManager currentTurn;
     public NetworkManager NetworkManager;
@@ -49,23 +50,13 @@ public class GameManager : NetworkBehaviour
         playerManager = networkIdentity.GetComponent<PlayerManager>();
         cardIndicator = GameObject.Find("CurrentCardIndicator");
         cardIndicatorAnimator = cardIndicator.GetComponent<Animator>();
-        DelayStartGame();
+        StartCoroutine(DelayStartGame());
         players.Callback += OnPlayersUpdated;
         GraveyardUpdate.AddListener(UpdatePoison);
         //Coroutine is always on, can be triggered to loop through Action Queue
         StartCoroutine(PlayActionQueue());
         
     }
-    //Maybe unnecessary
-    public void ActivateActionQueue()
-    {
-        actionQueuePlaying = true;
-        foreach (IEnumerator e in actionQueue)
-        {
-            Debug.Log(e);
-        }
-    }
-
     //Coroutine for looping through Action Queue
     public IEnumerator PlayActionQueue()
     {
@@ -91,18 +82,26 @@ public class GameManager : NetworkBehaviour
             }
         }
     }
-    public void DelayStartGame()
+    public IEnumerator DelayStartGame()
     {
-        Invoke("StartGame", 4);
+        while (!startGame)
+        {
+            startGame = playerManager.startGame;
+            yield return null;
+        }
+        StartCoroutine(StartGame());
     }
-    public void StartGame()
+    public IEnumerator StartGame()
     {
         OnTurnStart.AddListener(StartTurn);
         OnPlay.AddListener(PlayCard);
         playerManager.UpdatePlayerList();
-        int playerNum = Random.Range(0,1);
-        playerManager.StartPlayer();
+        while (players.Count < 2)
+        {
+            yield return null;
+        }
         AssignFirstTurn();
+        playerManager.StartPlayer();
     }
 
     //Example TurnStart Callback
@@ -118,9 +117,12 @@ public class GameManager : NetworkBehaviour
 
     public void AssignFirstTurn()
     {
-        if (players.Count >= 1)
+        if (isServer)
         {
-            players[0].ChangeTurn();
+            int ranPlayer = Random.Range(0, 2);
+            Debug.Log(players.Count);
+            Debug.Log(ranPlayer);
+            players[ranPlayer].SetTurn();
         }
     }
     [Command(requiresAuthority = false)]
@@ -155,8 +157,6 @@ public class GameManager : NetworkBehaviour
     [ClientRpc]
     public void RpcChangeTurn()
     {
-        // Debug.Log(playerManager.GetComponent<NetworkIdentity>().isLocalPlayer);
-        // Debug.Log(playerManager.isTurn);
         if (playerManager.GetComponent<NetworkIdentity>().isLocalPlayer && !playerManager.isTurn)
         {
             OnTurnStart?.Invoke(playerManager);

@@ -12,6 +12,8 @@ public class PlayerManager : NetworkBehaviour
     //GameManager
     public GameObject GameManager;
     public GameManager gameManager;
+
+    public bool startGame;
     //Action Queue
     public Queue<IEnumerator> actionQueue;
     //Action Queue Bool
@@ -64,6 +66,7 @@ public class PlayerManager : NetworkBehaviour
     public override void OnStartClient()
     {
         base.OnStartClient();
+        ClientReady();
         playerHandArea = GameObject.Find("PlayerHandArea");
         enemyHandArea = GameObject.Find("EnemyHandArea");
         playerFieldArea = GameObject.Find("PlayerField");
@@ -96,6 +99,26 @@ public class PlayerManager : NetworkBehaviour
         hasSummon = true;
 
     }
+    //Called OnStartClient to check if client has connected (client will always connect second)
+    public void ClientReady()
+    {
+        if (!isServer)
+        {
+            CmdClientReady();
+        }
+    }
+    [Command (requiresAuthority = false)]
+    public void CmdClientReady()
+    {
+        RpcClientReady();
+    }
+    [ClientRpc]
+    //If client has connected, startGame will become true on all clients, and then gameManagers
+    public void RpcClientReady()
+    {
+        startGame = true;
+    }
+    //Syncvar Hook triggers when certain values are updated -- Unit Count, etc.
     public void CheckContinuous(int oldVal, int newVal)
     {
         Debug.Log(newVal);
@@ -148,9 +171,9 @@ public class PlayerManager : NetworkBehaviour
         {
             // QueueDraw(5);
         }
-        if (isTurn)
+        if (isTurn && isLocalPlayer)
         {
-            Invoke("StartTurn", 3);
+            StartTurn();
         }
     }
     public void UpdateSummonAndAttacks()
@@ -191,6 +214,14 @@ public class PlayerManager : NetworkBehaviour
             }
         }
     }
+    public void SetTurn(){
+        CmdSetTurn();
+    }
+    [Command(requiresAuthority = false)]
+    public void CmdSetTurn()
+    {
+        isTurn = true;
+    }
     public void ChangeTurn()
     {
         CmdChangeTurn();
@@ -208,7 +239,6 @@ public class PlayerManager : NetworkBehaviour
             if (gameManager.turnNumber > 0)
             {
                 DrawCard(2);
-                gameManager.ActivateActionQueue();
             }
             UpdateSummonAndAttacks();
         }
@@ -221,7 +251,6 @@ public class PlayerManager : NetworkBehaviour
     public void CmdUpdatePlayerList()
     {
         gameManager.players.Add(GetComponent<PlayerManager>());
-
     }
     //Draw Card Function
     public void DrawCard(int num)
