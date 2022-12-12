@@ -12,7 +12,7 @@ public class PlayerManager : NetworkBehaviour
     //GameManager
     public GameObject GameManager;
     public GameManager gameManager;
-
+    //Set to true when client is ready to start the game
     public bool startGame;
     //Action Queue
     public Queue<IEnumerator> actionQueue;
@@ -43,7 +43,7 @@ public class PlayerManager : NetworkBehaviour
 
     //Areas where cards can be spawned, etc.
     public GameObject Player, Enemy, playerHandArea, playerDiscardArea, enemyHandArea, playerFieldArea, playerUtilityArea, enemyFieldArea, enemyUtilityArea, enemyDiscardArea;
-    public GameObject card, playerAvatarZone, enemyAvatarZone, playerFieldIndicator, playerUtilityIndicator, gameText;
+    public GameObject card, playerAvatarZone, enemyAvatarZone, gameText;
     public PlayerInfo playerInfo;
 
     [SyncVar]
@@ -70,10 +70,8 @@ public class PlayerManager : NetworkBehaviour
         playerHandArea = GameObject.Find("PlayerHandArea");
         enemyHandArea = GameObject.Find("EnemyHandArea");
         playerFieldArea = GameObject.Find("PlayerField");
-        playerFieldIndicator = GameObject.Find("PlayerFieldIndicator");
         playerUtilityArea = GameObject.Find("PlayerUtility");
         enemyUtilityArea = GameObject.Find("EnemyUtility");
-        playerUtilityIndicator = GameObject.Find("PlayerUtilityIndicator");
         enemyFieldArea = GameObject.Find("EnemyField");
         playerDiscardArea = GameObject.Find("PlayerDiscard");
         enemyDiscardArea = GameObject.Find("EnemyDiscard");
@@ -214,6 +212,7 @@ public class PlayerManager : NetworkBehaviour
             }
         }
     }
+    //Will be called to assign a random player the first turn
     public void SetTurn(){
         CmdSetTurn();
     }
@@ -222,6 +221,7 @@ public class PlayerManager : NetworkBehaviour
     {
         isTurn = true;
     }
+    //Called to change turns
     public void ChangeTurn()
     {
         CmdChangeTurn();
@@ -243,6 +243,7 @@ public class PlayerManager : NetworkBehaviour
             UpdateSummonAndAttacks();
         }
     }
+    //Adds player to Gamemanager's list of players
     public void UpdatePlayerList()
     {
         CmdUpdatePlayerList();
@@ -298,6 +299,7 @@ public class PlayerManager : NetworkBehaviour
             actionComplete = gameManager.actionComplete;
             yield return null;
         }
+        card.GetComponent<CardBehaviour>().interactable = true;
     }
     public IEnumerator DrawCardEnemy(GameObject card, int cardNo)
     {
@@ -321,6 +323,7 @@ public class PlayerManager : NetworkBehaviour
             actionComplete = gameManager.actionComplete;
             yield return null;
         }
+        card.GetComponent<CardBehaviour>().interactable = true;
     }
     [Command(requiresAuthority = false)]
     //Called to refresh deck count number
@@ -547,6 +550,7 @@ public class PlayerManager : NetworkBehaviour
 
         }
         destroyQueue.Clear();
+        gameManager.GraveyardUpdate?.Invoke();
         // Waits until action is complete and the Gamemanager's actionComplete bool is true;
         while (destroyQueue.Count > 0)
         {
@@ -616,6 +620,7 @@ public class PlayerManager : NetworkBehaviour
 
         }
         destroyQueue.Clear();
+        gameManager.GraveyardUpdate?.Invoke();
         // Waits until action is complete and the Gamemanager's actionComplete bool is true;
         while (destroyQueue.Count > 0)
         {
@@ -749,6 +754,7 @@ public class PlayerManager : NetworkBehaviour
             {
                 playerDiscard.Remove(card);
                 Destroy(card);
+                gameManager.GraveyardUpdate?.Invoke();
             }
             else if (action == "Create")
             {
@@ -780,6 +786,7 @@ public class PlayerManager : NetworkBehaviour
                 }
                 //Placeholder Animation
                 card.GetComponent<AnimateCard>().StartPlayerPlay();
+                card.GetComponent<CardBehaviour>().interactable = true;
             }
             else if (action == "Return")
             {
@@ -853,6 +860,7 @@ public class PlayerManager : NetworkBehaviour
                     p.enemyDiscard.Remove(card);
                 }
                 Destroy(card);
+                gameManager.GraveyardUpdate?.Invoke();
             }
             else if (action == "Create")
             {

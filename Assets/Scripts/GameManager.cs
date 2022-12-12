@@ -373,44 +373,94 @@ public class GameManager : NetworkBehaviour
         cardIndicator.transform.GetChild(1).gameObject.SetActive(true);
         cardIndicatorAnimator.Play("Base Layer.cardeffectindicator", -1, 0);
     }
-    public int CaluculatePoison()
+    //Calculates poison (Poison = the number of unique card types in your graveyard)
+    public int CaluculatePoison(PlayerManager poisonSource)
     {
+        //Reset poison each time it is calculated in order to avoid counting old data
         int poison = 0;
+        //Reset list each time it is calculated in order to avoid counting old data
         List<Card.CardType> cardTypes = new List<Card.CardType>();
-
-        foreach (PlayerManager p in players)
+        List<GameObject> poisonDiscard = new List<GameObject>();
+        //Calculate from the correct list depending on authority
+        if (poisonSource.hasAuthority)
         {
-            foreach (Transform t in p.enemyDiscardArea.transform)
+            poisonDiscard = poisonSource.playerDiscard;
+        }
+        else if (!poisonSource.hasAuthority)
+        {
+            poisonDiscard = poisonSource.enemyDiscard;
+        }
+        foreach (GameObject card in poisonDiscard)
+        {
+            Card.CardType currentType = card.GetComponent<CardDisplay>().card.cardType;
+            //Only add to the list if the currentType is not already counted
+            if (!cardTypes.Contains(currentType))
             {
-                Card.CardType currentType = t.GetComponent<CardDisplay>().card.cardType;
-                if (!cardTypes.Contains(currentType))
-                {
-                    cardTypes.Add(currentType);
-                }
+                cardTypes.Add(currentType);
             }
         }
         poison = cardTypes.Count;
         return poison;
     }
+    //To be called by appropriate events (principally when the graveyard count is changed), or when a unit is poisoned
     public void UpdatePoison(){
-
+        CmdUpdatePoison();
     }
-    [Command]
+    [Command(requiresAuthority = false)]
     public void CmdUpdatePoison(){
         RpcUpdatePoison();
     }
     [ClientRpc]
     public void RpcUpdatePoison()
     {
+        //Updates poison for each player
         foreach(PlayerManager p in players)
         {
+            //checks the playerfield of localPlayer and enemy
             foreach (GameObject g in p.playerField)
             {
-                int currentAttack = g.GetComponent<CardDisplay>().card.attack;
-                int originalHealth = g.GetComponent<CardDisplay>().card.originalAttack;
-                int currentPoison = CaluculatePoison();
-
+                Card card = g.GetComponent<CardDisplay>().card;
+                if (card.poisoned)
+                {
+                    //poisonSource defined at the time a unit is poisoned
+                    int currentPoison = CaluculatePoison(card.poisonSource);
+                    card.attack = card.originalAttack - currentPoison;
+                    g.GetComponent<CardDisplay>().SetCardProperties();
+                }
+            }
+            //checks the enemyField of localPlayer and enemy
+            foreach (GameObject g in p.enemyField)
+            {
+                Card card = g.GetComponent<CardDisplay>().card;
+                if (card.poisoned)
+                {
+                    int currentPoison = CaluculatePoison(card.poisonSource);
+                    card.attack = card.originalAttack - currentPoison;
+                    g.GetComponent<CardDisplay>().SetCardProperties();
+                }
             }
         }
+    }
+    //Function for first poisoning a unit
+    public void PoisonUnit(GameObject card, PlayerManager poisonSource)
+    {
+        CmdPoisonUnit(card, poisonSource);
+    }
+    [Command(requiresAuthority = false)]
+    public void CmdPoisonUnit(GameObject card, PlayerManager poisonSource)
+    {
+        RpcPoisonUnit(card, poisonSource);
+    }
+    [ClientRpc]
+    public void RpcPoisonUnit(GameObject card, PlayerManager poisonSource)
+    {
+        //Sets poisoned boolean on card to true (will qualify card for poison updates)
+        card.GetComponent<CardDisplay>().card.poisoned = true;
+        //Sets source of poison (which player's graveyard will be counted)
+        card.GetComponent<CardDisplay>().card.poisonSource = poisonSource;
+        //Immediately calculates how much poison the unit suffers
+        UpdatePoison();
+        //Updates card to reflect poison changes
+        card.GetComponent<CardDisplay>().SetCardProperties();
     }
 }

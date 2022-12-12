@@ -2637,7 +2637,7 @@ MonoBehaviour:
   effectSelectable: 0
   hover: 0
   isDragging: 0
-  interactable: 1
+  interactable: 0
 --- !u!61 &587298080017563493
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -6183,7 +6183,7 @@ MonoBehaviour:
   m_text: 3  /  5
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
-  m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_sharedMaterial: {fileID: 2100000, guid: 3ffa3bc217b507344bfbf6f4a462397a, type: 2}
   m_fontSharedMaterials: []
   m_fontMaterial: {fileID: 0}
   m_fontMaterials: []
@@ -8489,7 +8489,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &6442784148363203466
 RectTransform:
   m_ObjectHideFlags: 0

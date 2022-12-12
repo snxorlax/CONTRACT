@@ -16,11 +16,14 @@ MonoBehaviour:
   cardType: 1
   artColor: {r: 0.34117648, g: 0.49411765, b: 0.5019608, a: 1}
   attack: 4
+  originalAttack: 4
   health: 1
   originalHealth: 1
   bounty: 4
   currentZone: 
   shroud: 0
+  poisoned: 0
+  poisonSource: {fileID: 0}
   cardName: MADFLEET PARAGON
   cardText: 'Contract: Betray 1.                                                Deathwalk:
     Create a *Madfleet Drone*.'

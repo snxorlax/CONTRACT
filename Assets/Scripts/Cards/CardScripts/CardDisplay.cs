@@ -28,7 +28,7 @@ public class CardDisplay : MonoBehaviour
         {
             // Display Art + Determine Art Color
             art = transform.Find("Front").Find("Art").gameObject.GetComponent<Image>();
-
+            //Sync sprite via number in catalogue
             art.sprite = artCatalogue.cardArt[card.cardNo];
             art.color = card.artColor;
 
@@ -39,6 +39,7 @@ public class CardDisplay : MonoBehaviour
             frameMain = frame.Find("Main").gameObject.GetComponent<Image>();
             frameInner = frame.Find("Inner").gameObject.GetComponent<Image>();
             frameShadow = frame.Find("Shadow").gameObject.GetComponent<Image>();
+            //Will be used to display the correct bounty if necessary
             bounty = frame.Find("Bounty").gameObject;
 
             //Set statbox to proper object
@@ -78,6 +79,7 @@ public class CardDisplay : MonoBehaviour
                     frameMain.color = henchmanColors[1];
                     frameInner.color = henchmanColors[2];
                     frameShadow.color = henchmanColors[3];
+                    statBox.gameObject.SetActive(true);
                     SetBounty(card.bounty);
                     break;
                 case Card.CardType.Relic:
@@ -103,6 +105,7 @@ public class CardDisplay : MonoBehaviour
                     frameMain.color = villainColors[1];
                     statBackgroundField.GetChild(1).GetComponent<Image>().color = villainColors[1];
                     statBackgroundField.GetChild(2).GetComponent<Image>().color = villainColors[1];
+                    statBox.gameObject.SetActive(true);
                     frameInner.color = villainColors[2];
                     frameShadow.color = villainColors[3];
                     SetBounty(card.bounty);

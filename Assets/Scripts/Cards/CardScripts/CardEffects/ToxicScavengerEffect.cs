@@ -46,9 +46,10 @@ public class ToxicScavengerEffect : CardEffect
             t.GetComponent<CardBehaviour>().effectSelectable = false;
         }
         player.gameText.GetComponent<TextMeshProUGUI>().enabled = false;
-        gameManager.ChangeStats(target, -2, 0);
         player.ExileCard(self);
+        gameManager.PoisonUnit(target, player);
         player.currentEffect.Clear();
+        gameManager.GraveyardUpdate?.Invoke();
         gameManager.EnableZone(gameManager.playerManager.playerHandArea);
         gameManager.EnableZone(gameManager.playerManager.playerFieldArea);
         gameManager.EnableZone(gameManager.playerManager.playerUtilityArea);

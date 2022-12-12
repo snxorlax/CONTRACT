@@ -29,7 +29,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     public bool contractSelectable;
     public bool effectSelectable;
     public bool hover, isDragging;
-    public bool interactable = true;
+    public bool interactable = false;
 
 
 
@@ -326,7 +326,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         //Refactor names. This is a draft.
         if (other.gameObject.CompareTag("PlayZone"))
         {
-            if (hasAuthority)
+            if (hasAuthority && interactable)
             {
                 GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = true;
             }

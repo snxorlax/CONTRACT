@@ -16,10 +16,10 @@ public class Card : ScriptableObject
     public int attack, originalAttack, health, originalHealth, bounty;
     public string currentZone;
     public bool shroud;
-
+    public bool poisoned = false;
+    public PlayerManager poisonSource;
     public string cardName;
     public string cardText;
-
     public CardEffect cardEffect;
     public List<string> activatedEffectText;
     public string deathWalkText;

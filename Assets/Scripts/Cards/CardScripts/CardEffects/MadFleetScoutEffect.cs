@@ -12,12 +12,16 @@ public class MadFleetScoutEffect : CardEffect
         {
 
             gameManager.ChangeStats(self, 2, 1);
+            self.GetComponent<CardDisplay>().card.originalAttack += 2;
+            self.GetComponent<CardDisplay>().card.originalHealth += 1;
             self.GetComponent<CardBehaviour>().SetCard();
             empowered = true;
         }
         if (player.playerField.Count < 5 && empowered)
         {
             gameManager.ChangeStats(self, -2, -1);
+            self.GetComponent<CardDisplay>().card.originalAttack -= 2;
+            self.GetComponent<CardDisplay>().card.originalHealth -= 1;
             self.GetComponent<CardBehaviour>().SetCard();
             empowered = false;
         }
