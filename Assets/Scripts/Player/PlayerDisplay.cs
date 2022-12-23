@@ -14,7 +14,7 @@ public class PlayerDisplay : MonoBehaviour
     }
     public void SetPlayerProperties()
     {
-        lifeTotal = transform.Find("LifeTotal").gameObject.GetComponent<TextMeshProUGUI>();
+        lifeTotal = transform.Find("LifeTotal").Find("Text").Find("LifeTotal").gameObject.GetComponent<TextMeshProUGUI>();
 
         lifeTotal.text = playerInfo.lifeTotal.ToString();
     }

@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: PlayerInfo
   m_EditorClassIdentifier: 
   avatar: {fileID: 0}
-  lifeTotal: 30
+  lifeTotal: 40

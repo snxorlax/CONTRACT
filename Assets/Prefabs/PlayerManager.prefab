@@ -64,9 +64,15 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0
+  GameManager: {fileID: 0}
+  gameManager: {fileID: 0}
+  startGame: 0
+  actionComplete: 0
+  destroyQueue: []
   playerHand: []
   enemyHand: []
   playerDeck: []
+  enemyDeck: []
   playerField: []
   playerUtility: []
   playerDiscard: []
@@ -75,11 +81,13 @@ MonoBehaviour:
   enemyUtility: []
   currentContract: []
   currentEffect: []
+  enemyManager: {fileID: 0}
   deck: {fileID: 11400000, guid: a4ffc3398921ffa49bdde10cc2c92392, type: 2}
-  cardsInDeck: {fileID: 0}
+  playerDeckCount: {fileID: 0}
+  enemyDeckCount: {fileID: 0}
   deckIndicator: {fileID: 0}
-  GameManager: {fileID: 0}
-  Player: {fileID: 2822950261297683761, guid: 47758039a883da7478cc75f7cd62df5e, type: 3}
+  enemyDeckIndicator: {fileID: 0}
+  Player: {fileID: 2992293848277318176, guid: a8f34a27bcead0f4d9527d91fd5b1a1b, type: 3}
   Enemy: {fileID: 0}
   playerHandArea: {fileID: 0}
   playerDiscardArea: {fileID: 0}
@@ -92,14 +100,13 @@ MonoBehaviour:
   card: {fileID: 587298080017563496, guid: 3073add86e04df842a0ca36c8745b922, type: 3}
   playerAvatarZone: {fileID: 0}
   enemyAvatarZone: {fileID: 0}
-  playerFieldIndicator: {fileID: 0}
-  playerUtilityIndicator: {fileID: 0}
   gameText: {fileID: 0}
   playerInfo: {fileID: 11400000, guid: 8512a2ba6c800d948b13f9331a3d1444, type: 2}
   isTurn: 0
   isSelectingUnit: 0
   isSelectingRelic: 0
   hasSummon: 0
+  openingDraw: 1
   playerUnitCount: 0
   blade: 0
 --- !u!114 &4051975077294839565
