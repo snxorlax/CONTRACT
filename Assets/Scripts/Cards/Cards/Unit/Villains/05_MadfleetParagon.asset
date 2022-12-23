@@ -25,8 +25,8 @@ MonoBehaviour:
   poisoned: 0
   poisonSource: {fileID: 0}
   cardName: MADFLEET PARAGON
-  cardText: 'Contract: Betray 1.                                                Deathwalk:
-    Create a *Madfleet Drone*.'
+  cardText: '<color=#9A733C>Contract</color>: Betray 1.                                               
+    Deathwalk: Create a *Madfleet Drone*.'
   cardEffect: {fileID: 11400000, guid: c110e571d2665d34984b92b1692f0625, type: 2}
   activatedEffectText: []
   deathWalkText: Create a *MadFleet Drone*.
