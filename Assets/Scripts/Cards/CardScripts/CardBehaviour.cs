@@ -326,7 +326,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         //Refactor names. This is a draft.
         if (other.gameObject.CompareTag("PlayZone"))
         {
-            if (hasAuthority && interactable)
+            if (hasAuthority && interactable && isDragging)
             {
                 GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = true;
             }
@@ -366,12 +366,15 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     hoverCard.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
                 }
             }
+            //Behaviour for hovering cards in hand
             if (transform.parent == handZone.transform)
             {
-                transform.localScale *= 1.4f;
-                handZone.transform.position = new Vector3(handZone.transform.position.x, handZone.transform.position.y + .4f);
-                handZone.transform.localScale *= 1.4f;
+                handZone.transform.localPosition = new Vector2(handZone.transform.localPosition.x, -421f);
+                handZone.transform.localScale *= 1.55f;
+                transform.localScale *= 1.85f;
+                transform.localPosition = new Vector2(transform.localPosition.x, 80);
                 transform.SetAsLastSibling();
+                playerDisplay.FanHand(playerManager.playerHand, gameObject);
             }
             else if (card.currentZone == "Discard" && !isDragging)
             {
@@ -396,8 +399,11 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         if (card.currentZone == "Hand")
         {
             transform.localScale = originalScale;
+            transform.localPosition = new Vector2(transform.localPosition.x, 0);
             handZone.transform.position = originalHandPos;
             handZone.transform.localScale = originalHandScale;
+            playerDisplay.ResetRotations(playerManager.playerHand);
+            playerDisplay.DisplayHorizontal(playerManager.playerHand, Display.handOffset);
         }
         if (card.currentZone == "Discard")
         {

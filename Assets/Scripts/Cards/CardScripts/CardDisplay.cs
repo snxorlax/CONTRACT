@@ -28,9 +28,12 @@ public class CardDisplay : MonoBehaviour
         {
             // Display Art + Determine Art Color
             art = transform.Find("Front").Find("Art").gameObject.GetComponent<Image>();
-            //Sync sprite via number in catalogue
-            art.sprite = artCatalogue.cardArt[card.cardNo];
-            art.color = card.artColor;
+            //Sync sprite via number in catalogue to texture of instantiated material
+            art.material = new Material(art.material);
+            art.material.SetTexture("MainTexture", artCatalogue.cardArt[card.cardNo].texture);
+
+            // art.sprite = artCatalogue.cardArt[card.cardNo];
+            // art.color = card.artColor;
 
             //Assign frame parts to proper components
             frame = transform.Find("Front").Find("Frame");
