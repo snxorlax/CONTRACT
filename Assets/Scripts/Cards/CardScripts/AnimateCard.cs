@@ -118,7 +118,7 @@ public class AnimateCard : NetworkBehaviour
         }
         if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
         {
-            GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
+            // GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
         }
         StartCoroutine(AnimateCompletePlayerPlay());
     }
@@ -155,7 +155,7 @@ public class AnimateCard : NetworkBehaviour
         }
         if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
         {
-            GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
+            // GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
         }
         StartCoroutine(CompleteEnemyPlayAnimation());
     }
