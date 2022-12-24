@@ -6,13 +6,20 @@ using TMPro;
 
 public class CardDisplay : MonoBehaviour
 {
+    //Scriptable Object card associated with this GameObject
     public Card card;
-    public List<GameObject> activatedEffects;
-    public GameObject deathWalk, shroud;
+    //Card Behaviour associated with this GameObject. Used to sync card between components
+    [Header("Scripts")]
+    public CardBehaviour cardBehaviour;
+    //AnimateCard script associated with this object
+    public AnimateCard animateCard;
+    [Header("Catalogues")]
     public CardArtCatalogue artCatalogue;
     public CardCatalogue cardCatalogue;
-    public CardBehaviour cardBehaviour;
-    public AnimateCard animateCard;
+    [Header("Views")]
+    public GameObject handViewFront;
+    public GameObject handViewBack, fieldViewUnit, fieldViewRelic;
+    //Used to sync card and cardArt without sending sprites and other complex datatypes over network
     [Header ("HandView Properties")]
     public Image handArt; 
     public Image handFrameOuter, handFrameMain, handFrameInner, handFrameShadow;
@@ -30,10 +37,43 @@ public class CardDisplay : MonoBehaviour
     public TextMeshProUGUI cardTypeText;
     public TextMeshProUGUI cardText;
 
+    [Header ("FieldView Properties, Player, Unit")]
+    public Image playerFieldArt; 
+    public Image playerFieldFrameOuter, playerFieldFrameMain, playerFieldFrameInner, playerFieldFrameShadow;
+
+    [Header ("FieldView BattleStats, Player, Unit")]
+    public Image playerFieldAttackFrame;
+    public Image playerFieldAttackBackground_1, playerFieldAttackBackground_2, playerFieldAttackBackground_3;
+    public Image playerFieldHealthFrame, playerFieldHealthBackground_1, playerFieldHealthBackground_2, playerFieldHealthBackground_3;
+    public TextMeshProUGUI playerFieldAttack, playerFieldHealth;
+
+    [Header ("FieldView Properties, Enemy, Unit")]
+    public Image enemyFieldArt; 
+    public Image enemyFieldFrameOuter, enemyFieldFrameMain, enemyFieldFrameInner, enemyFieldFrameShadow;
+
+    [Header ("FieldView BattleStats, Enemy, Unit")]
+    public Image enemyFieldAttackFrame;
+    public Image enemyFieldAttackBackground_1, enemyFieldAttackBackground_2, enemyFieldAttackBackground_3;
+    public Image enemyFieldHealthFrame, enemyFieldHealthBackground_1, enemyFieldHealthBackground_2, enemyFieldHealthBackground_3;
+    public TextMeshProUGUI enemyFieldAttack, enemyFieldHealth;
+
+    // [Header("FieldView Properties, Relic")]
+
+    [Header ("Lists for Assigning Colors")]
+    public List<Image> handFrameImages;
+    public List<Image> handAttackImages, handHealthImages;
+    public List<Image> playerUnitImages, playerAttackImages, playerHealthImages;
+    public List<Image> enemyUnitImages, enemyAttackImages, enemyHealthImages;
+
     //Preset color combinations for different card types
     [Header("CardType Color Presets")]
     public List<Color> henchmanColors;
     public List<Color> relicColors, vaColors, calamityColors, villainColors, attackColors, henchmanHealthColors, villainHealthColors;
+
+    //GameObjects used to activate effects if applicable
+    [Header("Card Effects")]
+    public GameObject deathWalk, shroud;
+    public List<GameObject> activatedEffects;
     
     void OnEnable()
     {
@@ -43,88 +83,57 @@ public class CardDisplay : MonoBehaviour
     {
         if (card)
         {
-            //Switch statement to assign GameObject and component references based on cardZone
-            switch (card.currentZone)
+            //Sync sprite via number in catalogue to texture of instantiated material
+            handArt.material.SetTexture("MainTexture", artCatalogue.cardArt[card.cardNo].texture);
+            switch (card.cardType)
             {
-                case "Hand":
-                break;
-                case "Field":
-                break;
-            }
-            // Display Art + Determine Art Color
-            // art = transform.Find("Front").Find("Art").gameObject.GetComponent<Image>();
-            // //Sync sprite via number in catalogue to texture of instantiated material
-    
-            // art.material.SetTexture("MainTexture", artCatalogue.cardArt[card.cardNo].texture);
-            if (transform.Find("CardEffects"))
-            {
-                for (int i = 0; i < card.activatedEffectText.Count; i++)
-                {
-                    if (!activatedEffects.Contains(transform.Find("CardEffects").GetChild(i+1).gameObject))
+                case Card.CardType.Henchman:
+                    for (int i = 0; i < handFrameImages.Count; i++)
                     {
-                        activatedEffects.Add(transform.Find("CardEffects").GetChild(i+1).gameObject);
+                        handFrameImages[i].color = henchmanColors[i];
                     }
-                    activatedEffects[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.activatedEffectText[i];
-                    activatedEffects[i].GetComponent<CardEffectGUIBehaviour>().effectNumber = i;
-                }
-                if (card.deathWalk)
-                {
-                    deathWalk = transform.Find("CardEffects").GetChild(4).gameObject;
-                    deathWalk.GetComponent<CardEffectGUIBehaviour>().effectNumber = 3;
-                    deathWalk.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.deathWalkText;
-                }
-                shroud = transform.Find("CardEffects").GetChild(5).gameObject;
-                shroud.GetComponent<CardEffectGUIBehaviour>().effectNumber = 4;
+                    for (int i = 0; i < handAttackImages.Count; i++)
+                    {
+                        handAttackImages[i].color = attackColors[i];
+                        handHealthImages[i].color = henchmanHealthColors[i];
+                    }
+                    handStatBox.SetActive(true);
+                    SetBounty(card.bounty);
+                    break;
+                case Card.CardType.Relic:
+                    for (int i = 0; i < handFrameImages.Count; i++)
+                    {
+                        handFrameImages[i].color = relicColors[i];
+                    }
+                    handStatBox.gameObject.SetActive(false);
+                    break;
+                case Card.CardType.VillainousArt:    
+                    for (int i = 0; i < handFrameImages.Count; i++)
+                    {
+                        handFrameImages[i].color = vaColors[i];
+                    }
+                    handStatBox.gameObject.SetActive(false);
+                    break;
+                case Card.CardType.Villain:
+                    for (int i = 0; i < handFrameImages.Count; i++)
+                    {
+                        handFrameImages[i].color = villainColors[i];
+                    }
+                    for (int i = 0; i < handAttackImages.Count; i++)
+                    {
+                        handAttackImages[i].color = attackColors[i];
+                        handHealthImages[i].color = villainHealthColors[i];
+                    }
+                    SetBounty(card.bounty);
+                    break;
+                case Card.CardType.Calamity:
+                    for (int i = 0; i < handFrameImages.Count; i++)
+                    {
+                        handFrameImages[i].color = calamityColors[i];
+                    }
+                    SetBounty(card.bounty);
+                    break;
             }
-
-            // switch (card.cardType)
-            // {
-                // case Card.CardType.Henchman:
-            //         frameOuter.color = henchmanColors[0];
-            //         statFrame.color = henchmanColors[0];
-            //         statFrameField.color = henchmanColors[0];
-            //         frameMain.color = henchmanColors[1];
-            //         frameInner.color = henchmanColors[2];
-            //         frameShadow.color = henchmanColors[3];
-            //         handStatBox.SetActive(true);
-            //         SetBounty(card.bounty);
-            //         break;
-            //     case Card.CardType.Relic:
-            //         frameOuter.color = relicColors[0];
-            //         frameMain.color = relicColors[1];
-            //         frameInner.color = relicColors[2];
-            //         frameShadow.color = relicColors[3];
-            //         statBox.gameObject.SetActive(false);
-            //         statBoxField.gameObject.SetActive(false);
-            //         break;
-            //     case Card.CardType.VillainousArt:    
-            //         frameOuter.color = vaColors[0];
-            //         frameMain.color = vaColors[1];
-            //         frameInner.color = vaColors[2];
-            //         frameShadow.color = vaColors[3];
-            //         statBox.gameObject.SetActive(false);
-            //         statBoxField.gameObject.SetActive(false);
-            //         break;
-            //     case Card.CardType.Villain:
-            //         frameOuter.color = villainColors[0];
-            //         statFrame.color = villainColors[0];
-            //         statFrameField.color = villainColors[0];
-            //         frameMain.color = villainColors[1];
-            //         statBackgroundField.GetChild(1).GetComponent<Image>().color = villainColors[1];
-            //         statBackgroundField.GetChild(2).GetComponent<Image>().color = villainColors[1];
-            //         statBox.gameObject.SetActive(true);
-            //         frameInner.color = villainColors[2];
-            //         frameShadow.color = villainColors[3];
-            //         SetBounty(card.bounty);
-            //         break;
-            //     case Card.CardType.Calamity:
-            //         frameOuter.color = calamityColors[0];
-            //         frameMain.color = calamityColors[1];
-            //         frameInner.color = calamityColors[2];
-            //         frameShadow.color = calamityColors[3];
-            //         SetBounty(card.bounty);
-            //         break;
-            // }
             // battleStats = statBox.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
             // battleStatsField = statBoxField.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
             // battleStats.text = card.attack.ToString() + "  /  " + card.health.ToString();
@@ -135,6 +144,7 @@ public class CardDisplay : MonoBehaviour
             cardTypeText.text = card.cardType.ToString();
 
             cardBehaviour.SetCard();
+            SetCardEffects();
 
             if (animateCard)
             {
@@ -151,6 +161,27 @@ public class CardDisplay : MonoBehaviour
         for (int i = 0; i < bountyNo; i++)
         {
             bounty.transform.GetChild(i).gameObject.SetActive(true);
+        }
+    }
+    public void SetCardEffects()
+    {
+        if (transform.Find("CardEffects"))
+        {
+            for (int i = 0; i < card.activatedEffectText.Count; i++)
+            {
+                if (!activatedEffects.Contains(transform.Find("CardEffects").GetChild(i + 1).gameObject))
+                {
+                    activatedEffects.Add(transform.Find("CardEffects").GetChild(i + 1).gameObject);
+                }
+                activatedEffects[i].transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.activatedEffectText[i];
+                activatedEffects[i].GetComponent<CardEffectGUIBehaviour>().effectNumber = i;
+            }
+            if (card.deathWalk)
+            {
+                deathWalk.GetComponent<CardEffectGUIBehaviour>().effectNumber = 3;
+                deathWalk.transform.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.deathWalkText;
+            }
+            shroud.GetComponent<CardEffectGUIBehaviour>().effectNumber = 4;
         }
     }
 

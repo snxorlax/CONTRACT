@@ -1659,13 +1659,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   card: {fileID: 0}
-  activatedEffects: []
-  deathWalk: {fileID: 0}
-  shroud: {fileID: 0}
-  artCatalogue: {fileID: 11400000, guid: 4b7527332322e2c40a55ae7774caefd4, type: 2}
-  cardCatalogue: {fileID: 11400000, guid: 1b1c1f1b9fc275a46a2be3d45d5e555f, type: 2}
   cardBehaviour: {fileID: 2185364488859896106}
   animateCard: {fileID: 49006555130519342}
+  artCatalogue: {fileID: 11400000, guid: 4b7527332322e2c40a55ae7774caefd4, type: 2}
+  cardCatalogue: {fileID: 11400000, guid: 1b1c1f1b9fc275a46a2be3d45d5e555f, type: 2}
+  handViewFront: {fileID: 2185364490559591977}
+  handViewBack: {fileID: 8553204752211549162}
+  fieldViewUnit: {fileID: 5114570517254778067}
+  fieldViewRelic: {fileID: 5114570519136473805}
   handArt: {fileID: 2185364489608888757}
   handFrameOuter: {fileID: 2185364488977969607}
   handFrameMain: {fileID: 2185364490707285541}
@@ -1686,6 +1687,81 @@ MonoBehaviour:
   cardName: {fileID: 2185364490272739938}
   cardTypeText: {fileID: 2185364489184846427}
   cardText: {fileID: 2185364488760970874}
+  playerFieldArt: {fileID: 5114570517386749541}
+  playerFieldFrameOuter: {fileID: 5114570518501959291}
+  playerFieldFrameMain: {fileID: 5114570518559178580}
+  playerFieldFrameInner: {fileID: 5114570517912900727}
+  playerFieldFrameShadow: {fileID: 5114570517976455793}
+  playerFieldAttackFrame: {fileID: 5114570517824215404}
+  playerFieldAttackBackground_1: {fileID: 5114570518153572586}
+  playerFieldAttackBackground_2: {fileID: 5114570517462808391}
+  playerFieldAttackBackground_3: {fileID: 5114570517484745436}
+  playerFieldHealthFrame: {fileID: 5114570518353229299}
+  playerFieldHealthBackground_1: {fileID: 5114570517854714916}
+  playerFieldHealthBackground_2: {fileID: 5114570517699494104}
+  playerFieldHealthBackground_3: {fileID: 5114570518415561568}
+  playerFieldAttack: {fileID: 5114570518185889386}
+  playerFieldHealth: {fileID: 5114570518230630562}
+  enemyFieldArt: {fileID: 5114570517400696581}
+  enemyFieldFrameOuter: {fileID: 5114570518396033583}
+  enemyFieldFrameMain: {fileID: 5114570517481500122}
+  enemyFieldFrameInner: {fileID: 5114570518656173187}
+  enemyFieldFrameShadow: {fileID: 5114570518905297134}
+  enemyFieldAttackFrame: {fileID: 5114570518521817991}
+  enemyFieldAttackBackground_1: {fileID: 5114570518311799020}
+  enemyFieldAttackBackground_2: {fileID: 5114570518416650169}
+  enemyFieldAttackBackground_3: {fileID: 5114570517910229054}
+  enemyFieldHealthFrame: {fileID: 5114570518817110153}
+  enemyFieldHealthBackground_1: {fileID: 5114570518589284301}
+  enemyFieldHealthBackground_2: {fileID: 5114570518163511196}
+  enemyFieldHealthBackground_3: {fileID: 5114570519125050857}
+  enemyFieldAttack: {fileID: 5114570518255783035}
+  enemyFieldHealth: {fileID: 5114570518311860344}
+  handFrameImages:
+  - {fileID: 2185364488977969607}
+  - {fileID: 2185364490707285541}
+  - {fileID: 2185364490523190403}
+  - {fileID: 2185364490289129760}
+  handAttackImages:
+  - {fileID: 5114570517173297228}
+  - {fileID: 5114570518522057057}
+  - {fileID: 5114570519009831202}
+  - {fileID: 5114570518997596695}
+  handHealthImages:
+  - {fileID: 5114570517227716579}
+  - {fileID: 5114570517114377888}
+  - {fileID: 5114570517496713082}
+  - {fileID: 5114570518354588458}
+  playerUnitImages:
+  - {fileID: 5114570518501959291}
+  - {fileID: 5114570518559178580}
+  - {fileID: 5114570517912900727}
+  - {fileID: 5114570517976455793}
+  playerAttackImages:
+  - {fileID: 5114570517824215404}
+  - {fileID: 5114570518153572586}
+  - {fileID: 5114570517462808391}
+  - {fileID: 5114570517484745436}
+  playerHealthImages:
+  - {fileID: 5114570518353229299}
+  - {fileID: 5114570517854714916}
+  - {fileID: 5114570517699494104}
+  - {fileID: 5114570518415561568}
+  enemyUnitImages:
+  - {fileID: 5114570518396033583}
+  - {fileID: 5114570517481500122}
+  - {fileID: 5114570518656173187}
+  - {fileID: 5114570518905297134}
+  enemyAttackImages:
+  - {fileID: 5114570518521817991}
+  - {fileID: 5114570518311799020}
+  - {fileID: 5114570518416650169}
+  - {fileID: 5114570517910229054}
+  enemyHealthImages:
+  - {fileID: 5114570518817110153}
+  - {fileID: 5114570518589284301}
+  - {fileID: 5114570518163511196}
+  - {fileID: 5114570519125050857}
   henchmanColors:
   - {r: 0.2392157, g: 0.18039216, b: 0, a: 1}
   - {r: 0.08627451, g: 0.08627451, b: 0.08627451, a: 1}
@@ -1731,6 +1807,9 @@ MonoBehaviour:
   - {r: 0.050980397, g: 0.050980397, b: 0.050980397, a: 1}
   - {r: 0.08627451, g: 0.08627451, b: 0.08627451, a: 1}
   - {r: 0, g: 0.050980397, b: 0.08627451, a: 1}
+  deathWalk: {fileID: 7095454178697181162}
+  shroud: {fileID: 7938112681495893536}
+  activatedEffects: []
 --- !u!114 &2185364488859896106
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2531,7 +2610,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2185364490559591976
 RectTransform:
   m_ObjectHideFlags: 0
@@ -4790,7 +4869,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570517330169513}
   m_Layer: 5
-  m_Name: StatBoxField-Attack
+  m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5131,7 +5210,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570517437081750}
   m_Layer: 5
-  m_Name: StatBoxField-Attack
+  m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5263,7 +5342,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5114570518446723212}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -5468,7 +5547,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570517506811132}
   m_Layer: 5
-  m_Name: StatBoxField-Health
+  m_Name: Health
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5777,7 +5856,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570517669391609}
   m_Layer: 5
-  m_Name: StatboxField
+  m_Name: Statbox
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5848,7 +5927,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570517698281607}
   m_Layer: 5
-  m_Name: StatBoxField-Attack
+  m_Name: Attack
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6124,7 +6203,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570517783624106}
   m_Layer: 5
-  m_Name: PlayView
+  m_Name: FieldView
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -7722,81 +7801,6 @@ MonoBehaviour:
   m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
---- !u!1 &5114570518236970961
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 5114570518236970962}
-  - component: {fileID: 5114570518236970964}
-  - component: {fileID: 5114570518236970963}
-  m_Layer: 5
-  m_Name: OuterShadow
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &5114570518236970962
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5114570518236970961}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 5114570518446723212}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 122.16, y: 135.735}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!222 &5114570518236970964
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5114570518236970961}
-  m_CullTransparentMesh: 1
---- !u!114 &5114570518236970963
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5114570518236970961}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Material: {fileID: 0}
-  m_Color: {r: 0.14150941, g: 0.109797224, b: 0.0073424703, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_Sprite: {fileID: 0}
-  m_Type: 0
-  m_PreserveAspect: 0
-  m_FillCenter: 1
-  m_FillMethod: 4
-  m_FillAmount: 1
-  m_FillClockwise: 1
-  m_FillOrigin: 0
-  m_UseSpriteMesh: 0
-  m_PixelsPerUnitMultiplier: 1
 --- !u!1 &5114570518243079467
 GameObject:
   m_ObjectHideFlags: 0
@@ -9099,7 +9103,6 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 5114570518396033582}
-  - {fileID: 5114570518236970962}
   - {fileID: 5114570517481500121}
   - {fileID: 5114570518656173186}
   - {fileID: 5114570518905297133}
@@ -9751,7 +9754,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5114570518446723212}
-  m_RootOrder: 3
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -10160,7 +10163,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570518853722489}
   m_Layer: 5
-  m_Name: StatBoxField-Health
+  m_Name: Health
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -10367,7 +10370,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5114570518446723212}
-  m_RootOrder: 4
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -10481,7 +10484,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 5114570518446723212}
-  m_RootOrder: 5
+  m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
@@ -11449,7 +11452,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5114570519205924346}
   m_Layer: 5
-  m_Name: StatBoxField-Health
+  m_Name: Health
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
