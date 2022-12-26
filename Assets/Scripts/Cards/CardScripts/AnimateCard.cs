@@ -6,8 +6,14 @@ using Mirror;
 
 public class AnimateCard : NetworkBehaviour
 {
-    public Transform cardEffectIndicator, front, back, mainBoard;
     public Card card;
+    // Helper object for animations
+    public Transform animHelper;
+    // Animator used by animHelper
+    public Animator helpAnimator;
+    //Transforms for changing views
+    public Transform handFront, back, fieldFrontPlayer, fieldFrontEnemy;
+    public Transform mainBoard;
     //Prefab for destroying and creating
     public GameObject cardDissolve;
     //Material for instantiating different dissolving art
@@ -15,19 +21,15 @@ public class AnimateCard : NetworkBehaviour
     public PlayerManager playerManager;
     public GameManager gameManager;
     
-    public Animator cardAnimator, cardIndicatorAnimator;
     public AnimationClip drawClipPlayer, drawClipEnemy, playClipEnemy;
     public Canvas canvas;
 
     private void Awake()
     {
         card = GetComponent<CardDisplay>().card;
-        cardAnimator = GetComponent<Animator>();
-        // front = transform.Find("Front");
-        // back = transform.Find("Back");
-        cardEffectIndicator = GameObject.Find("CurrentCardIndicator").transform;
+        animHelper = GameObject.Find("AnimHelper").transform;
         
-        cardIndicatorAnimator = cardEffectIndicator.GetComponent<Animator>();
+        helpAnimator = animHelper.GetComponent<Animator>();
         mainBoard = GameObject.Find("MainBoard").transform;
         canvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
         
@@ -42,24 +44,24 @@ public class AnimateCard : NetworkBehaviour
     //Player Draw in 3 Parts
     public void DrawPlayerCard()
     {
-        // front.gameObject.SetActive(false);
-        // cardEffectIndicator.GetComponent<CardDisplay>().card = card;
-        // cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
-        // cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
+        handFront.gameObject.SetActive(false);
+        animHelper.GetComponent<CardDisplay>().card = card;
+        animHelper.GetComponent<CardDisplay>().SetCardProperties();
+        helpAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
         Invoke("CompletePlayerDraw", drawClipPlayer.length);
     }
     public void CompletePlayerDraw()
     {
-        front.gameObject.SetActive(true);
-        // front.position = cardEffectIndicator.position;
-        // front.localScale = cardEffectIndicator.localScale;
+        handFront.gameObject.SetActive(true);
+        handFront.position = animHelper.position;
+        handFront.localScale = animHelper.localScale;
         StartCoroutine(CompletePlayerDrawAnimation());
     }
     public IEnumerator CompletePlayerDrawAnimation(){
-        while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
+        while (Vector2.Distance(handFront.localPosition, Vector2.zero) > .01f)
         {
-            front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
-            front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
+            handFront.localScale = Vector3.Lerp(handFront.localScale, new Vector3(1,1,1), .3f);
+            handFront.localPosition = Vector2.Lerp(handFront.localPosition, Vector2.zero, .1f);
             yield return null;
         }
         CompleteAction();
@@ -68,16 +70,16 @@ public class AnimateCard : NetworkBehaviour
     //Enemy Draw in 3 Parts
     public void DrawEnemyCard()
     {
-        // front.gameObject.SetActive(false);
-        // back.gameObject.SetActive(false);
-        // cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
+        handFront.gameObject.SetActive(false);
+        back.gameObject.SetActive(false);
+        helpAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
         Invoke("CompleteEnemyDraw", drawClipEnemy.length);
     }
     public void CompleteEnemyDraw()
     {
-        // back.gameObject.SetActive(true);
-        // back.position = cardEffectIndicator.position;
-        // back.localScale = cardEffectIndicator.localScale;
+        back.gameObject.SetActive(true);
+        back.position = animHelper.position;
+        back.localScale = animHelper.localScale;
         StartCoroutine(CompleteEnemyDrawAnimation());
     }
     public IEnumerator CompleteEnemyDrawAnimation(){
@@ -87,12 +89,8 @@ public class AnimateCard : NetworkBehaviour
             back.localPosition = Vector2.Lerp(back.localPosition, Vector2.zero, .1f);
             yield return null;
         }
-        front.gameObject.SetActive(true);
+        handFront.gameObject.SetActive(true);
         CompleteAction();
-    }
-    //Disable animator once it's not useful
-    public void DisableAnimator(){
-        cardAnimator.enabled = false;
     }
 
     //Animate Player PlayCard in 4 Parts
@@ -100,70 +98,67 @@ public class AnimateCard : NetworkBehaviour
         StartCoroutine(AnimateStartPlayerPlay());
     }
     public IEnumerator AnimateStartPlayerPlay(){
-        while (Vector2.Distance(front.position, mainBoard.position)> .01f)
+        float scaleFactor = 1.5f / playerManager.playerFieldArea.transform.localScale.x;
+        while (Vector2.Distance(handFront.position, mainBoard.position)> .01f || handFront.localScale.x - scaleFactor > .01f)
         {
-            front.localScale = Vector3.Lerp(front.localScale, new Vector3(2.3f,2.3f,2.3f), .3f);
-            front.position = Vector2.Lerp(front.position, mainBoard.position, .1f);
+            handFront.localScale = Vector3.Lerp(handFront.localScale, new Vector3(scaleFactor, scaleFactor, scaleFactor), .2f);
+            handFront.position = Vector2.Lerp(handFront.position, mainBoard.position, .06f);
             yield return null;
         }
         Invoke("CompletePlayerPlay", .8f);
     }
     public void CompletePlayerPlay()
     {
-        transform.Find("Front").Find("Text").gameObject.SetActive(false);
+        //Switches from handview to fieldview
+        handFront.gameObject.SetActive(false);
+        fieldFrontPlayer.gameObject.SetActive(true);
+        fieldFrontPlayer.transform.localScale = handFront.transform.localScale;
+        fieldFrontPlayer.transform.localPosition = handFront.transform.localPosition;
+        handFront.transform.localScale = new Vector3(1,1,1);
         GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
         if (!card)
         {
             card = GetComponent<CardDisplay>().card;
         }
-        if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
-        {
-            // GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
-        }
         StartCoroutine(AnimateCompletePlayerPlay());
     }
     public IEnumerator AnimateCompletePlayerPlay(){
-        while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
+        while (Vector2.Distance(fieldFrontPlayer.localPosition, Vector2.zero) > .01f || fieldFrontPlayer.localScale != new Vector3(1,1,1))
         {
-            front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
-            front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
+            fieldFrontPlayer.localScale = Vector3.Lerp(fieldFrontPlayer.localScale, new Vector3(1,1,1), .3f);
+            fieldFrontPlayer.localPosition = Vector2.Lerp(fieldFrontPlayer.localPosition, Vector2.zero, .1f);
             yield return null;
         }
         CompleteAction();
-        // StopAllCoroutines();
     }
     //Complete Enemy Play Card in 3 Steps
     public void PlayEnemyCard()
     {
-        front.gameObject.SetActive(false);
+        handFront.gameObject.SetActive(false);
         back.gameObject.SetActive(false);
-        cardEffectIndicator.GetComponent<CardDisplay>().card = GetComponent<CardDisplay>().card;
-        cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
-        cardIndicatorAnimator.Play("Base Layer.PlayCard_Enemy", -1, 0);
+        animHelper.GetComponent<CardDisplay>().card = GetComponent<CardDisplay>().card;
+        animHelper.GetComponent<CardDisplay>().SetCardProperties();
+        helpAnimator.Play("Base Layer.PlayCard_Enemy", -1, 0);
         Invoke("CompleteEnemyPlay", playClipEnemy.length);
     }
     public void CompleteEnemyPlay()
     {
-        front.gameObject.SetActive(true);
-        front.localScale = cardEffectIndicator.transform.Find("Front").localScale;
+        //switches view from handview to fieldview
+        fieldFrontEnemy.gameObject.SetActive(true);
+        fieldFrontEnemy.localScale = animHelper.transform.Find("Views").Find("HandView").Find("Front").localScale;
         transform.rotation = Quaternion.identity;
-        front.position = cardEffectIndicator.position;
-        transform.Find("Front").Find("Text").gameObject.SetActive(false);
+        fieldFrontEnemy.position = animHelper.position;
         if (!card)
         {
             card = GetComponent<CardDisplay>().card;
         }
-        if (card.cardType == Card.CardType.Henchman || card.cardType == Card.CardType.Villain)
-        {
-            // GetComponent<CardDisplay>().statBoxField.gameObject.SetActive(true);
-        }
         StartCoroutine(CompleteEnemyPlayAnimation());
     }
     public IEnumerator CompleteEnemyPlayAnimation(){
-        while (Vector2.Distance(front.localPosition, Vector2.zero) > .01f)
+        while (Vector2.Distance(fieldFrontEnemy.localPosition, Vector2.zero) > .01f)
         {
-            front.localScale = Vector3.Lerp(front.localScale, new Vector3(1,1,1), .3f);
-            front.localPosition = Vector2.Lerp(front.localPosition, Vector2.zero, .1f);
+            fieldFrontEnemy.localScale = Vector3.Lerp(fieldFrontEnemy.localScale, new Vector3(1,1,1), .3f);
+            fieldFrontEnemy.localPosition = Vector2.Lerp(fieldFrontEnemy.localPosition, Vector2.zero, .1f);
             yield return null;
         }
         CompleteAction();

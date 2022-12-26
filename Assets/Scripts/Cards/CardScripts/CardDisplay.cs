@@ -16,8 +16,9 @@ public class CardDisplay : MonoBehaviour
     public List<Image> artList;
     //List of battle text in different views
     public List<TextMeshProUGUI> attackTextList, healthTextList;
-    //Card Behaviour associated with this GameObject. Used to sync card between components
+    public Image handIndicator, fieldIndicator;
     [Header("Scripts")]
+    //Card Behaviour associated with this GameObject. Used to sync card between components
     public CardBehaviour cardBehaviour;
     //AnimateCard script associated with this object
     public AnimateCard animateCard;
@@ -293,6 +294,18 @@ public class CardDisplay : MonoBehaviour
         for (int i = 0; i < bountyNo; i++)
         {
             bounty.transform.GetChild(i).gameObject.SetActive(true);
+        }
+    }
+    public void SetIndicator(string view, bool val)
+    {
+        switch (view)
+        {
+            case "Hand":
+            handIndicator.enabled = val;
+            break;
+            case "Field":
+            fieldIndicator.enabled = val;
+            break;
         }
     }
 }

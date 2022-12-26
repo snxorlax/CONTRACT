@@ -27,7 +27,6 @@ public class BladeWingRookieEffect : CardEffect
     public override void PlayEffect(GameObject target)
     {
         player.blade ++;
-        gameManager.cardIndicator.transform.GetChild(1).gameObject.SetActive(false);
         gameManager.Damage(target, player.blade);
         gameManager.PlayVFX(target, "Blade");
         foreach (Transform t in enemyField.transform)

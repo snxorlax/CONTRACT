@@ -21,7 +21,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ArtDissolve
-  m_Shader: {fileID: -6465566751694194690, guid: c8e32034a3bc03943a2c98f6a255832d, type: 3}
+  m_Shader: {fileID: -6465566751694194690, guid: 76dd871dcc3f81948a5c04a2bd92a30f, type: 3}
   m_ShaderKeywords: _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
@@ -40,7 +40,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - MainTexture:
-        m_Texture: {fileID: 2800000, guid: 7082bfb070d9fc449be9d249a03a4cde, type: 3}
+        m_Texture: {fileID: 2800000, guid: 0bb974c4e4b51664492686064ac9108e, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - Texture2D_039cbd45ad6b49b8a7eafd256e848d62:
@@ -140,9 +140,10 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - DissolveAmount: 0
+    - DissolveAmount: 2.22
     - Vector1_581ac13bba5b4026b77a7f7a3f5c3a79: 0
     - Vector1_70a210082d5d497aa2f81fafe0f19d50: 0
+    - Vector1_e58c42f2c20c4f34afe3f0b3b724c7a0: 1.44
     - _AORemapMax: 1
     - _AORemapMin: 0
     - _ATDistance: 1
@@ -158,8 +159,9 @@ Material:
     - _AlphaToMask: 0
     - _AlphaToMaskInspectorValue: 0
     - _Anisotropy: 0
-    - _BlendMode: 4
+    - _BlendMode: 0
     - _CoatMask: 0
+    - _ColorMask: 15
     - _CullMode: 2
     - _CullModeForward: 2
     - _Cutoff: 0.5
@@ -221,6 +223,10 @@ Material:
     - _SpecularAAThreshold: 0.2
     - _SpecularOcclusionMode: 1
     - _SrcBlend: 1
+    - _Stencil: 0
+    - _StencilComp: 8
+    - _StencilOp: 0
+    - _StencilReadMask: 255
     - _StencilRef: 0
     - _StencilRefDepth: 0
     - _StencilRefDistortionVec: 4
@@ -255,7 +261,8 @@ Material:
     - _ZTestTransparent: 4
     - _ZWrite: 0
     m_Colors:
-    - Color_89f7ac0962c1459c9090a5c6d8ae3085: {r: 0.3490566, g: 0.15312387, b: 0.15312387, a: 1}
+    - Color_89f7ac0962c1459c9090a5c6d8ae3085: {r: 1, g: 1, b: 1, a: 0}
+    - Color_ba9ca6e9b6584cb09674ac3ad0bd1f0d: {r: 0.12264147, g: 0.11627797, b: 0.11627797, a: 0}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

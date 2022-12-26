@@ -24,8 +24,8 @@ public class GameManager : NetworkBehaviour
     public NetworkManager NetworkManager;
     public GameObject mainCanvas;
     public GameObject player, enemy;
-    public GameObject cardIndicator;
-    public Animator cardIndicatorAnimator;
+    public GameObject animHelper;
+    public Animator helpAnimator;
     
     // Action Queue for separating animations, events, actions, etc.
     public Queue<IEnumerator> actionQueue = new Queue<IEnumerator>();
@@ -48,8 +48,8 @@ public class GameManager : NetworkBehaviour
         // enemy = GameObject.Find("EnemyAvatar");
         NetworkIdentity networkIdentity = NetworkClient.connection.identity;
         playerManager = networkIdentity.GetComponent<PlayerManager>();
-        cardIndicator = GameObject.Find("CurrentCardIndicator");
-        cardIndicatorAnimator = cardIndicator.GetComponent<Animator>();
+        animHelper = GameObject.Find("AnimHelper");
+        helpAnimator = animHelper.GetComponent<Animator>();
         StartCoroutine(DelayStartGame());
         players.Callback += OnPlayersUpdated;
         GraveyardUpdate.AddListener(UpdatePoison);

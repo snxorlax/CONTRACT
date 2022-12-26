@@ -12,7 +12,7 @@ public class MadfleetParagonEffect : CardEffect
         foreach (Transform t in playerField.transform)
         {
 
-            t.Find("Indicator").GetComponent<Image>().enabled = true;
+            t.GetComponent<CardDisplay>().SetIndicator("Field", true);
             t.GetComponent<CardBehaviour>().contractSelectable = true;
         }
         gameManager.DisableZone(gameManager.playerManager.playerHandArea);
@@ -27,8 +27,7 @@ public class MadfleetParagonEffect : CardEffect
         player.UpdateSelectedUnits(self, false);
         foreach (Transform t in playerField.transform)
         {
-
-            t.Find("Indicator").GetComponent<Image>().enabled = false;
+            t.GetComponent<CardDisplay>().SetIndicator("Field", false);
             t.GetComponent<CardBehaviour>().contractSelectable = false;
         }
         player.currentContract.Remove(self);

@@ -264,7 +264,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 if (card.cardType == Card.CardType.Villain)
                 {
                     card.cardEffect.Contract();
-                    // playerManager.PlayCard(gameObject, false);
                 }
                     if (card.cardType == Card.CardType.Henchman && !playerManager.hasSummon)
                     {
@@ -304,7 +303,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             {
                 foreach (Transform child in enemyField.transform)
                 {
-                    child.Find("Indicator").gameObject.GetComponent<Image>().enabled = false;
+                    child.GetComponent<CardDisplay>().SetIndicator("Field", false);
                 }
 
             }
@@ -361,8 +360,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 {
                     hoverCard.GetComponent<CardDisplay>().card = card;
                     hoverCard.GetComponent<CardDisplay>().SetCardProperties();
-                    hoverCard.transform.Find("Front").gameObject.SetActive(true);
-                    hoverCard.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
+                    hoverCard.transform.Find("Views").Find("HandView").Find("Front").gameObject.SetActive(true);
                 }
             }
             //Behaviour for hovering cards in hand
@@ -393,7 +391,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public void OnPointerExit(PointerEventData pointerEventData)
     {
-        hoverCard.transform.Find("Front").gameObject.SetActive(false);
+        hoverCard.transform.Find("Views").Find("HandView").Find("Front").gameObject.SetActive(false);
 
         if (card.currentZone == "Hand")
         {
