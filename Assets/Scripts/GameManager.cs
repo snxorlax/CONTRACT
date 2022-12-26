@@ -251,7 +251,7 @@ public class GameManager : NetworkBehaviour
             {
                 playerManager.DestroyCard(target);
             }
-            target.GetComponent<CardDisplay>().SetCardProperties();
+            target.GetComponent<CardDisplay>().SetStats();
         }
         else if (target.GetComponent<PlayerDisplay>())
         {
@@ -331,7 +331,7 @@ public class GameManager : NetworkBehaviour
         {
             playerManager.DestroyCard(target);
         }
-        target.GetComponent<CardDisplay>().SetCardProperties();
+        target.GetComponent<CardDisplay>().SetStats();
     }
     public void ResetStats(GameObject card)
     {
@@ -365,13 +365,6 @@ public class GameManager : NetworkBehaviour
         {
             behaviour.interactable = true;
         }
-    }
-    public void AnimateIndicator(Card card)
-    {
-        cardIndicator.GetComponent<CardDisplay>().card = card;
-        cardIndicator.GetComponent<CardDisplay>().SetCardProperties();
-        cardIndicator.transform.GetChild(1).gameObject.SetActive(true);
-        cardIndicatorAnimator.Play("Base Layer.cardeffectindicator", -1, 0);
     }
     //Calculates poison (Poison = the number of unique card types in your graveyard)
     public int CaluculatePoison(PlayerManager poisonSource)
@@ -425,7 +418,7 @@ public class GameManager : NetworkBehaviour
                     //poisonSource defined at the time a unit is poisoned
                     int currentPoison = CaluculatePoison(card.poisonSource);
                     card.attack = card.originalAttack - currentPoison;
-                    g.GetComponent<CardDisplay>().SetCardProperties();
+                    g.GetComponent<CardDisplay>().SetStats();
                 }
             }
             //checks the enemyField of localPlayer and enemy
@@ -436,7 +429,7 @@ public class GameManager : NetworkBehaviour
                 {
                     int currentPoison = CaluculatePoison(card.poisonSource);
                     card.attack = card.originalAttack - currentPoison;
-                    g.GetComponent<CardDisplay>().SetCardProperties();
+                    g.GetComponent<CardDisplay>().SetStats();
                 }
             }
         }
@@ -461,6 +454,6 @@ public class GameManager : NetworkBehaviour
         //Immediately calculates how much poison the unit suffers
         UpdatePoison();
         //Updates card to reflect poison changes
-        card.GetComponent<CardDisplay>().SetCardProperties();
+        card.GetComponent<CardDisplay>().SetStats();
     }
 }

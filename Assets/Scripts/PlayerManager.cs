@@ -310,7 +310,7 @@ public class PlayerManager : NetworkBehaviour
         //Draw Card Enemy
         card.transform.SetParent(enemyHandArea.transform, false);
         card.transform.rotation = Quaternion.Euler(0, 0, -180);
-        card.transform.Find("Back").gameObject.SetActive(true);
+        // card.transform.Find("Back").gameObject.SetActive(true);
         playerDeck.Remove(card.GetComponent<CardDisplay>().cardCatalogue.CardList[cardNo]);
         UpdateDeckCount();
         enemyHand.Add(card);
@@ -836,14 +836,14 @@ public class PlayerManager : NetworkBehaviour
                     {
                         card.transform.SetParent(enemyFieldArea.transform, false);
                         card.GetComponent<CardDisplay>().card.health = card.GetComponent<CardDisplay>().card.originalHealth;
-                        card.GetComponent<CardDisplay>().SetCardProperties();
+                        card.GetComponent<CardDisplay>().SetStats();
                         p.enemyField.Add(card);
                     }
                     else if (card.GetComponent<CardDisplay>().card.cardType == Card.CardType.Relic)
                     {
                         card.transform.SetParent(enemyUtilityArea.transform, false);
                         card.GetComponent<CardDisplay>().card.health = card.GetComponent<CardDisplay>().card.originalHealth;
-                        card.GetComponent<CardDisplay>().SetCardProperties();
+                        card.GetComponent<CardDisplay>().SetStats();
                         p.enemyUtility.Add(card);
                     }
 

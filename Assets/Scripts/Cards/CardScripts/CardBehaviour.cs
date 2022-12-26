@@ -46,7 +46,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         playerUtility = GameObject.Find("PlayerUtility").gameObject;
         playerDiscard = GameObject.Find("PlayerDiscard").gameObject;
         mainBoard = GameObject.Find("MainBoard").gameObject;
-        indicator = transform.Find("Indicator").gameObject;
         hoverCard = GameObject.Find("HoverCard");
         player = NetworkClient.connection.identity.gameObject;
         playerManager = player.GetComponent<PlayerManager>();
@@ -372,7 +371,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 handZone.transform.localPosition = new Vector2(handZone.transform.localPosition.x, -421f);
                 handZone.transform.localScale *= 1.55f;
                 transform.localScale *= 1.85f;
-                transform.localPosition = new Vector2(transform.localPosition.x, 80);
+                transform.localPosition = new Vector2(transform.localPosition.x, 83);
                 transform.SetAsLastSibling();
                 playerDisplay.FanHand(playerManager.playerHand, gameObject);
             }

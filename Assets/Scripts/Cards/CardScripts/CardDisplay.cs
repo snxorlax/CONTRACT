@@ -8,6 +8,14 @@ public class CardDisplay : MonoBehaviour
 {
     //Scriptable Object card associated with this GameObject
     public Card card;
+    //List of lists to be updated, based on what current card contains. Can be useful if differentiating a card from an animator
+    public List<List<Image>> frameLists = new List<List<Image>>();
+    public List<List<Image>> attackImageLists = new List<List<Image>>(); 
+    public List<List<Image>> healthImageLists = new List<List<Image>>();
+    //List of art in different views
+    public List<Image> artList;
+    //List of battle text in different views
+    public List<TextMeshProUGUI> attackTextList, healthTextList;
     //Card Behaviour associated with this GameObject. Used to sync card between components
     [Header("Scripts")]
     public CardBehaviour cardBehaviour;
@@ -30,7 +38,7 @@ public class CardDisplay : MonoBehaviour
     public Image handAttackFrame;
     public Image handAttackBackground_1, handAttackBackground_2, handAttackBackground_3;
     public Image handHealthFrame, handHealthBackground_1, handHealthBackground_2, handHealthBackground_3;
-    public TextMeshProUGUI handAttack, handHealth;
+    public TextMeshProUGUI handAttackText, handHealthText;
 
     [Header ("CardText")]
     public TextMeshProUGUI cardName;
@@ -45,7 +53,7 @@ public class CardDisplay : MonoBehaviour
     public Image playerFieldAttackFrame;
     public Image playerFieldAttackBackground_1, playerFieldAttackBackground_2, playerFieldAttackBackground_3;
     public Image playerFieldHealthFrame, playerFieldHealthBackground_1, playerFieldHealthBackground_2, playerFieldHealthBackground_3;
-    public TextMeshProUGUI playerFieldAttack, playerFieldHealth;
+    public TextMeshProUGUI playerFieldAttackText, playerFieldHealthText;
 
     [Header ("FieldView Properties, Enemy, Unit")]
     public Image enemyFieldArt; 
@@ -55,15 +63,16 @@ public class CardDisplay : MonoBehaviour
     public Image enemyFieldAttackFrame;
     public Image enemyFieldAttackBackground_1, enemyFieldAttackBackground_2, enemyFieldAttackBackground_3;
     public Image enemyFieldHealthFrame, enemyFieldHealthBackground_1, enemyFieldHealthBackground_2, enemyFieldHealthBackground_3;
-    public TextMeshProUGUI enemyFieldAttack, enemyFieldHealth;
+    public TextMeshProUGUI enemyFieldAttackText, enemyFieldHealthText;
 
-    // [Header("FieldView Properties, Relic")]
+    [Header("FieldView Properties, Relic")]
+    public Image relicFieldArt;
 
     [Header ("Lists for Assigning Colors")]
     public List<Image> handFrameImages;
-    public List<Image> handAttackImages, handHealthImages;
-    public List<Image> playerUnitImages, playerAttackImages, playerHealthImages;
-    public List<Image> enemyUnitImages, enemyAttackImages, enemyHealthImages;
+    public List<Image> playerUnitImages, enemyUnitImages;
+    public List<Image> handAttackImages, playerAttackImages, enemyAttackImages;
+    public List<Image>  handHealthImages, playerHealthImages, enemyHealthImages;
 
     //Preset color combinations for different card types
     [Header("CardType Color Presets")]
@@ -77,74 +86,57 @@ public class CardDisplay : MonoBehaviour
     
     void OnEnable()
     {
-        SetCardProperties();
+        //Populate appropriate lists for assigning colors
+        //check if handview exists
+        if (handViewFront)
+        {
+            //Add handframes to be colored
+            frameLists.Add(handFrameImages);
+            //Add handAttack to be colored
+            attackImageLists.Add(handAttackImages);
+            //Add handHealth to be colored
+            healthImageLists.Add(handHealthImages);
+            //Add handArt to be assigned proper sprite
+            artList.Add(handArt);
+            //Add attacktext and healthtext to textlist
+            attackTextList.Add(handAttackText);
+            healthTextList.Add(handHealthText);
+        }
+        //check if fieldview exists
+        if (fieldViewUnit)
+        {
+            //add player and enemy frames to be colored
+            frameLists.Add(playerUnitImages);
+            frameLists.Add(enemyUnitImages);
+            //add player and enemy attack to be colored
+            attackImageLists.Add(playerAttackImages);
+            attackImageLists.Add(enemyAttackImages);
+            //add player and enemy health to be colored
+            healthImageLists.Add(playerHealthImages);
+            healthImageLists.Add(enemyHealthImages);
+            //add player and enemy art to be assigned proper sprite
+            artList.Add(playerFieldArt);
+            artList.Add(enemyFieldArt);
+            artList.Add(relicFieldArt);
+            //add player and enemy text to be updated
+            attackTextList.Add(playerFieldAttackText);
+            attackTextList.Add(enemyFieldAttackText);
+            healthTextList.Add(playerFieldHealthText);
+            healthTextList.Add(enemyFieldHealthText);
+        }
+        // SetCardProperties();
     }
+    //Main function to set art, colors, stats, text and effects for each applicable view of card
     public void SetCardProperties()
     {
         if (card)
         {
-            //Sync sprite via number in catalogue to texture of instantiated material
-            handArt.material.SetTexture("MainTexture", artCatalogue.cardArt[card.cardNo].texture);
-            switch (card.cardType)
-            {
-                case Card.CardType.Henchman:
-                    for (int i = 0; i < handFrameImages.Count; i++)
-                    {
-                        handFrameImages[i].color = henchmanColors[i];
-                    }
-                    for (int i = 0; i < handAttackImages.Count; i++)
-                    {
-                        handAttackImages[i].color = attackColors[i];
-                        handHealthImages[i].color = henchmanHealthColors[i];
-                    }
-                    handStatBox.SetActive(true);
-                    SetBounty(card.bounty);
-                    break;
-                case Card.CardType.Relic:
-                    for (int i = 0; i < handFrameImages.Count; i++)
-                    {
-                        handFrameImages[i].color = relicColors[i];
-                    }
-                    handStatBox.gameObject.SetActive(false);
-                    break;
-                case Card.CardType.VillainousArt:    
-                    for (int i = 0; i < handFrameImages.Count; i++)
-                    {
-                        handFrameImages[i].color = vaColors[i];
-                    }
-                    handStatBox.gameObject.SetActive(false);
-                    break;
-                case Card.CardType.Villain:
-                    for (int i = 0; i < handFrameImages.Count; i++)
-                    {
-                        handFrameImages[i].color = villainColors[i];
-                    }
-                    for (int i = 0; i < handAttackImages.Count; i++)
-                    {
-                        handAttackImages[i].color = attackColors[i];
-                        handHealthImages[i].color = villainHealthColors[i];
-                    }
-                    SetBounty(card.bounty);
-                    break;
-                case Card.CardType.Calamity:
-                    for (int i = 0; i < handFrameImages.Count; i++)
-                    {
-                        handFrameImages[i].color = calamityColors[i];
-                    }
-                    SetBounty(card.bounty);
-                    break;
-            }
-            // battleStats = statBox.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-            // battleStatsField = statBoxField.Find("Text").GetChild(0).gameObject.GetComponent<TextMeshProUGUI>();
-            // battleStats.text = card.attack.ToString() + "  /  " + card.health.ToString();
-            // battleStatsField.text = card.attack.ToString() + "  /  " + card.health.ToString();
-
-            cardText.text = card.cardText;
-            cardName.text = card.cardName;
-            cardTypeText.text = card.cardType.ToString();
-
-            cardBehaviour.SetCard();
+            SetArt();
+            SetColors();
+            SetStats();
+            SetText();
             SetCardEffects();
+            cardBehaviour.SetCard();
 
             if (animateCard)
             {
@@ -152,17 +144,125 @@ public class CardDisplay : MonoBehaviour
             }
         }
     }
-    public void SetBounty(int bountyNo)
+    public void SetArt()
     {
-        foreach (Transform t in bounty.transform)
+        foreach (Image a in artList)
         {
-            t.gameObject.SetActive(false);
-        }
-        for (int i = 0; i < bountyNo; i++)
-        {
-            bounty.transform.GetChild(i).gameObject.SetActive(true);
+            //Set material to instantiated material to allow for different main textures for different cards
+            a.material = new Material(a.material);
+            //Sync sprite via number in catalogue to texture of instantiated material
+            a.material.SetTexture("MainTexture", artCatalogue.cardArt[card.cardNo].texture);
         }
     }
+    //Applies the proper colors to the frame and statboxes of the views of card
+    public void SetColors()
+    {
+        Debug.Log(frameLists[0].Count);
+        Debug.Log(frameLists[1].Count);
+        Debug.Log(frameLists[2].Count);
+        switch (card.cardType)
+        {
+            case Card.CardType.Henchman:
+                for (int i = 0; i < henchmanColors.Count; i++)
+                {
+                    //Apply henchman colors to frames of all views
+                    foreach (List<Image> f in frameLists)
+                    {
+                        f[i].color = henchmanColors[i];
+                    }
+                }
+                for (int i = 0; i < attackColors.Count; i++)
+                {
+                    //Apply attack/health colors to all views
+                    foreach (List<Image> a in attackImageLists)
+                    {
+                        a[i].color = attackColors[i];
+                    }
+                    foreach (List<Image> h in healthImageLists)
+                    {
+                        h[i].color = henchmanHealthColors[i];
+                    }
+                }
+                //set statbox to active if henchman
+                handStatBox.SetActive(true);
+                //sets the appropropriate bounty
+                SetBounty(card.bounty);
+                break;
+            case Card.CardType.Relic:
+                for (int i = 0; i < relicColors.Count; i++)
+                {
+                    handFrameImages[i].color = relicColors[i];
+                }
+                //set statbox to inactive if relic
+                handStatBox.gameObject.SetActive(false);
+                break;
+            case Card.CardType.VillainousArt:
+                for (int i = 0; i < vaColors.Count; i++)
+                {
+                    handFrameImages[i].color = vaColors[i];
+                }
+                handStatBox.gameObject.SetActive(false);
+                break;
+            case Card.CardType.Villain:
+                //Apply villain colors to frames of all views
+                for (int i = 0; i < villainColors.Count; i++)
+                {
+                    foreach (List<Image> f in frameLists)
+                    {
+                        f[i].color = villainColors[i];
+                    }
+                }
+                //Apply attack/health colors to all views
+                for (int i = 0; i < attackColors.Count; i++)
+                {
+                    foreach (List<Image> a in attackImageLists)
+                    {
+                        a[i].color = attackColors[i];
+                    }
+                    foreach (List<Image> h in healthImageLists)
+                    {
+                        h[i].color = villainHealthColors[i];
+                    }
+                }
+                //set statbox to active if villain
+                handStatBox.SetActive(true);
+                //sets appropriate bounty
+                SetBounty(card.bounty);
+                break;
+
+            //Calamity will be more deeply implemented later
+            case Card.CardType.Calamity:
+                for (int i = 0; i < calamityColors.Count; i++)
+                {
+                    handFrameImages[i].color = calamityColors[i];
+                }
+                SetBounty(card.bounty);
+                break;
+        }
+    }
+
+    //Sets stats of all views to match card stat values
+    public void SetStats()
+    {
+        foreach (TextMeshProUGUI attackText in attackTextList)
+        {
+            attackText.text = card.attack.ToString();
+        }
+        foreach (TextMeshProUGUI healthText in healthTextList)
+        {
+            healthText.text = card.health.ToString();
+        }
+    }
+
+    //Sets text on card. Only visible in handView
+    public void SetText()
+    {
+        cardText.text = card.cardText;
+        cardName.text = card.cardName;
+        cardTypeText.text = card.cardType.ToString();
+    }
+
+    //Assign the cardEffectObjects to their proper effects
     public void SetCardEffects()
     {
         if (transform.Find("CardEffects"))
@@ -184,5 +284,15 @@ public class CardDisplay : MonoBehaviour
             shroud.GetComponent<CardEffectGUIBehaviour>().effectNumber = 4;
         }
     }
-
+    public void SetBounty(int bountyNo)
+    {
+        foreach (Transform t in bounty.transform)
+        {
+            t.gameObject.SetActive(false);
+        }
+        for (int i = 0; i < bountyNo; i++)
+        {
+            bounty.transform.GetChild(i).gameObject.SetActive(true);
+        }
+    }
 }

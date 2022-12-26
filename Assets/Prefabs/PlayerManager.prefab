@@ -97,7 +97,7 @@ MonoBehaviour:
   enemyFieldArea: {fileID: 0}
   enemyUtilityArea: {fileID: 0}
   enemyDiscardArea: {fileID: 0}
-  card: {fileID: 587298080017563496, guid: 3073add86e04df842a0ca36c8745b922, type: 3}
+  card: {fileID: 2185364488859896102, guid: 1a2cd2c193ba0aa4383d1b4b54dfc467, type: 3}
   playerAvatarZone: {fileID: 0}
   enemyAvatarZone: {fileID: 0}
   gameText: {fileID: 0}

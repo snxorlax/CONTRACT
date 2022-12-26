@@ -29,7 +29,7 @@ public class GoonEnforcerEffect : CardEffect
             gameManager.ChangeStats(self, 2, 1);
             self.GetComponent<CardDisplay>().card.originalAttack += 2;
             self.GetComponent<CardDisplay>().card.originalHealth += 1;
-            self.GetComponent<CardDisplay>().SetCardProperties();
+            self.GetComponent<CardDisplay>().SetStats();
             empowered = true;
         }
         else if (!accomplice && empowered)
@@ -37,7 +37,7 @@ public class GoonEnforcerEffect : CardEffect
             gameManager.ChangeStats(self, -2, -1);
             self.GetComponent<CardDisplay>().card.originalAttack -= 2;
             self.GetComponent<CardDisplay>().card.originalHealth -= 1;
-            self.GetComponent<CardDisplay>().SetCardProperties();
+            self.GetComponent<CardDisplay>().SetStats();
             empowered = false;
         }
         

@@ -23,8 +23,8 @@ public class AnimateCard : NetworkBehaviour
     {
         card = GetComponent<CardDisplay>().card;
         cardAnimator = GetComponent<Animator>();
-        front = transform.Find("Front");
-        back = transform.Find("Back");
+        // front = transform.Find("Front");
+        // back = transform.Find("Back");
         cardEffectIndicator = GameObject.Find("CurrentCardIndicator").transform;
         
         cardIndicatorAnimator = cardEffectIndicator.GetComponent<Animator>();
@@ -42,17 +42,17 @@ public class AnimateCard : NetworkBehaviour
     //Player Draw in 3 Parts
     public void DrawPlayerCard()
     {
-        front.gameObject.SetActive(false);
-        cardEffectIndicator.GetComponent<CardDisplay>().card = card;
-        cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
-        cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
+        // front.gameObject.SetActive(false);
+        // cardEffectIndicator.GetComponent<CardDisplay>().card = card;
+        // cardEffectIndicator.GetComponent<CardDisplay>().SetCardProperties();
+        // cardIndicatorAnimator.Play("Base Layer.DrawCard_Player", -1, 0);
         Invoke("CompletePlayerDraw", drawClipPlayer.length);
     }
     public void CompletePlayerDraw()
     {
         front.gameObject.SetActive(true);
-        front.position = cardEffectIndicator.position;
-        front.localScale = cardEffectIndicator.localScale;
+        // front.position = cardEffectIndicator.position;
+        // front.localScale = cardEffectIndicator.localScale;
         StartCoroutine(CompletePlayerDrawAnimation());
     }
     public IEnumerator CompletePlayerDrawAnimation(){
@@ -68,16 +68,16 @@ public class AnimateCard : NetworkBehaviour
     //Enemy Draw in 3 Parts
     public void DrawEnemyCard()
     {
-        front.gameObject.SetActive(false);
-        back.gameObject.SetActive(false);
-        cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
+        // front.gameObject.SetActive(false);
+        // back.gameObject.SetActive(false);
+        // cardIndicatorAnimator.Play("Base Layer.DrawCard_Enemy", -1, 0);
         Invoke("CompleteEnemyDraw", drawClipEnemy.length);
     }
     public void CompleteEnemyDraw()
     {
-        back.gameObject.SetActive(true);
-        back.position = cardEffectIndicator.position;
-        back.localScale = cardEffectIndicator.localScale;
+        // back.gameObject.SetActive(true);
+        // back.position = cardEffectIndicator.position;
+        // back.localScale = cardEffectIndicator.localScale;
         StartCoroutine(CompleteEnemyDrawAnimation());
     }
     public IEnumerator CompleteEnemyDrawAnimation(){

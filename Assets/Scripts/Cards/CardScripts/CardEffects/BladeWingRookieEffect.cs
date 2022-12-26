@@ -10,7 +10,6 @@ public class BladeWingRookieEffect : CardEffect
     public override void Play()
     {
         base.Play();
-        gameManager.AnimateIndicator(self.GetComponent<CardDisplay>().card);
         gameMessage = "Deal " + (player.blade + 1).ToString() + " damage.";
         foreach (Transform t in enemyField.transform)
         {
