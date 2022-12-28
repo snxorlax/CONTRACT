@@ -15,9 +15,8 @@ public class AnimateCard : NetworkBehaviour
     public Transform handFront, back, fieldFrontPlayer, fieldFrontEnemy;
     public Transform mainBoard;
     //Prefab for destroying and creating
-    public GameObject cardDissolve;
+    public GameObject cardDestroy;
     //Material for instantiating different dissolving art
-    public Material artDissolve;
     public PlayerManager playerManager;
     public GameManager gameManager;
     
@@ -27,6 +26,7 @@ public class AnimateCard : NetworkBehaviour
     private void Awake()
     {
         card = GetComponent<CardDisplay>().card;
+
         animHelper = GameObject.Find("AnimHelper").transform;
         
         helpAnimator = animHelper.GetComponent<Animator>();
@@ -167,31 +167,16 @@ public class AnimateCard : NetworkBehaviour
     //Destroys card, currently in 2 parts
     public void StartDestroyCard()
     {
-        GameObject cardDestroyed = Instantiate(cardDissolve, transform.position, Quaternion.identity, transform.parent);
-        cardDestroyed.transform.localScale = transform.localScale;
-        cardDestroyed.GetComponent<CardDisplay>().card = card;
-        cardDestroyed.GetComponent<CardDisplay>().SetCardProperties();
-        cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material = new Material(artDissolve);
-        cardDestroyed.transform.Find("Front").Find("Art").GetComponent<Image>().material.SetTexture("MainTexture", GetComponent<CardDisplay>().artCatalogue.cardArt[GetComponent<CardDisplay>().card.cardNo].texture);
-        StartCoroutine(AnimateDestroyCard(cardDestroyed));
+        cardDestroy.transform.GetChild(0).gameObject.SetActive(true);
+        cardDestroy.transform.SetParent(transform.parent, playerManager.playerFieldArea);
+        cardDestroy.GetComponent<Animator>().Play("Base Layer.FieldDestroy", -1, 0);
     }
-    public IEnumerator AnimateDestroyCard(GameObject card)
+    public IEnumerator AnimateDestroyCard()
     {
-        float dissolveAmount = 0;
-        float clipThreshold = 0;
-        Material dissolveMat = card.transform.Find("Front").Find("Art").GetComponent<Image>().material;
-        Material destroyMat = cardDissolve.transform.Find("Front").Find("CardBackground").GetComponent<Image>().material;
-        while (dissolveMat.GetFloat("DissolveAmount") < 3 )
+        while (false)
         {
-            dissolveMat.SetFloat("DissolveAmount", dissolveAmount);
-            destroyMat.SetFloat("ClipThreshold", clipThreshold);
-            dissolveAmount += .05f;
-            clipThreshold += .05f;
             yield return null;
         }
-        Destroy(card);
-        dissolveMat.SetFloat("DissolveAmount", 0);
-        destroyMat.SetFloat("ClipThreshold", 0);
         gameManager.ResetStats(gameObject);
     }
     public void StartAttack(GameObject attacker, GameObject defender)

@@ -551,7 +551,7 @@ public class PlayerManager : NetworkBehaviour
         }
         destroyQueue.Clear();
         gameManager.GraveyardUpdate?.Invoke();
-        // Waits until action is complete and the Gamemanager's actionComplete bool is true;
+        // Waits until destroyQueue is empty before completing coroutine
         while (destroyQueue.Count > 0)
         {
             yield return null;
