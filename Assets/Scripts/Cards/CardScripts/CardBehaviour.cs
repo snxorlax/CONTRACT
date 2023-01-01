@@ -9,7 +9,8 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
 {
     //Card used by this GameObject
     public Card card;
-
+    //Targeting Arrow
+    public GameObject arrow;
     //GameObjects associated with localPlayer
     public GameObject player, handZone, playerField, enemyField, playerAvatar, enemyAvatar, playerUtility, playerDiscard, mainBoard;
     //Indicator associated with this object
@@ -52,6 +53,8 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         playerDisplay = player.GetComponent<Display>();
         originalScale = transform.localScale;
 
+        arrow = GameObject.Find("Arrow");
+
         card = GetComponent<CardDisplay>().card;
         if (transform.Find("CardEffects"))
         {
@@ -89,7 +92,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             {
                 playerManager.PlayCard(playerManager.currentContract[0], false);
                 contractSelectable = false;
-                DestroyRelics();
                 playerManager.currentContract.Clear();
                 playerManager.isSelectingRelic = false;
             }
@@ -195,15 +197,16 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             //check for all the attacking prerequisites: your turn, your card, the card is on the field, and it is the second turn of the game, and correct mouse button is used
             else if (!card.shroud && playerManager.isTurn && hasAuthority && card.currentZone == "Field" && canAttack && gameManager.turnNumber > 1 && pointerEventData.button == PointerEventData.InputButton.Left)
             {
+                arrow.GetComponent<ArrowScript>().DrawArrow(transform.position);
                 isTargeting = true;
                 //Highlight available targets for attacking
                 if (enemyField.transform.childCount > 0)
                 {
-                    foreach (Transform child in enemyField.transform)
-                    {
-                        child.Find("Indicator").gameObject.GetComponent<Image>().enabled = true;
-                        child.Find("Indicator").gameObject.GetComponent<Image>().color = Color.red;
-                    }
+                    // foreach (Transform child in enemyField.transform)
+                    // {
+                    //     child.Find("Indicator").gameObject.GetComponent<Image>().enabled = true;
+                    //     child.Find("Indicator").gameObject.GetComponent<Image>().color = Color.red;
+                    // }
                 }
                 else if (enemyField.transform.childCount == 0)
                 {
@@ -222,7 +225,8 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         if (card.currentZone == "Field" && playerManager.isTurn)
         {
             //Deactivate the larger image when dragging for clarity
-            transform.Find("HoverImage").gameObject.SetActive(false);
+
+
             //Resets the parent transform because there is no longer a need to have larger image be in front of field zones
             transform.parent.SetSiblingIndex(8);
             if (pointerEventData.button == PointerEventData.InputButton.Right && card.activatedEffectText.Count > 0)
@@ -256,6 +260,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public void OnEndDrag(PointerEventData pointerEventData)
     {
+        arrow.GetComponent<ArrowScript>().HideArrow();
         if (interactable)
         {
             isTargeting = false;
@@ -428,98 +433,6 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 }
             }
         }
-    }
-
-    public void Bleed(int number)
-    {
-        CmdBleed(number);
-    }
-    [Command(requiresAuthority = false)]
-    public void CmdBleed(int number)
-    {
-        RpcBleed(number);
-    }
-    [ClientRpc]
-    public void RpcBleed(int number)
-    {
-        if (hasAuthority)
-        {
-            playerAvatar.GetComponent<PlayerDisplay>().playerInfo.lifeTotal -= number;
-            playerAvatar.GetComponent<PlayerDisplay>().SetPlayerProperties();
-        }
-        if (!hasAuthority)
-        {
-            enemyAvatar.GetComponent<PlayerDisplay>().playerInfo.lifeTotal -= number;
-            enemyAvatar.GetComponent<PlayerDisplay>().SetPlayerProperties();
-        }
-    }
-
-    public void Betray(int amount)
-    {
-        playerManager.isSelectingUnit = true;
-        foreach (Transform t in playerField.transform)
-        {
-            t.Find("Indicator").GetComponent<Image>().enabled = true;
-            t.Find("Indicator").GetComponent<Image>().color = Color.red;
-            playerManager.currentContract.Add(gameObject);
-        }
-    }
-    public void Greed(int amount)
-    {
-        playerManager.isSelectingRelic = true;
-        foreach (Transform t in playerUtility.transform)
-        {
-            t.Find("Indicator").GetComponent<Image>().enabled = true;
-            t.Find("Indicator").GetComponent<Image>().color = Color.red;
-            playerManager.currentContract.Add(gameObject);
-        }
-    }
-    public void DestroyUnits()
-    {
-        CmdDestroyUnits();
-    }
-    [Command(requiresAuthority = false)]
-    public void CmdDestroyUnits()
-    {
-        RpcDestroyUnits();
-    }
-    
-    [ClientRpc]
-    public void RpcDestroyUnits()
-    {
-        foreach (PlayerManager p in gameManager.players)
-        {
-            foreach (GameObject obj in p.selectedUnits)
-            {
-                p.DestroyCard(obj);
-            }
-        }
-        playerManager.UpdateSelectedUnits(gameObject, false);
-
-    }
-    public void DestroyRelics()
-    {
-        CmdDestroyRelics();
-    }
-    [Command(requiresAuthority = false)]
-    public void CmdDestroyRelics()
-    {
-        RpcDestroyRelics();
-    }
-    
-    [ClientRpc]
-    public void RpcDestroyRelics()
-    {
-        foreach (PlayerManager p in gameManager.players)
-        {
-            foreach (GameObject obj in p.selectedRelics)
-            {
-                // Debug.Log("Test");
-                p.DestroyCard(obj);
-            }
-        }
-        playerManager.UpdateSelectedRelics(gameObject, false);
-
     }
 
 

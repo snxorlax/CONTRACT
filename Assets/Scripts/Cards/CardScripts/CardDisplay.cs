@@ -8,6 +8,7 @@ public class CardDisplay : MonoBehaviour
 {
     //Scriptable Object card associated with this GameObject
     public Card card;
+    public Material cardMat, artMat;
     //List of lists to be updated, based on what current card contains. Can be useful if differentiating a card from an animator
     public List<List<Image>> frameLists = new List<List<Image>>();
     public List<List<Image>> attackImageLists = new List<List<Image>>(); 
@@ -158,9 +159,6 @@ public class CardDisplay : MonoBehaviour
     //Applies the proper colors to the frame and statboxes of the views of card
     public void SetColors()
     {
-        Debug.Log(frameLists[0].Count);
-        Debug.Log(frameLists[1].Count);
-        Debug.Log(frameLists[2].Count);
         switch (card.cardType)
         {
             case Card.CardType.Henchman:

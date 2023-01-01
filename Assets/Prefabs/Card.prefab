@@ -1955,7 +1955,6 @@ GameObject:
   - component: {fileID: 2185364488859896106}
   - component: {fileID: 2185364488859896107}
   - component: {fileID: 2185364488859896100}
-  - component: {fileID: 6568461438934397254}
   - component: {fileID: 49006555130519342}
   m_Layer: 5
   m_Name: Card
@@ -2026,6 +2025,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   card: {fileID: 0}
+  cardMat: {fileID: 2100000, guid: 08e3db930524a7948944575d6a940f58, type: 2}
+  artMat: {fileID: 2100000, guid: 00cabbf6828fed44b91adebcb7fcda5b, type: 2}
   artList: []
   attackTextList: []
   healthTextList: []
@@ -2270,25 +2271,6 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!95 &6568461438934397254
-Animator:
-  serializedVersion: 3
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2185364488859896102}
-  m_Enabled: 0
-  m_Avatar: {fileID: 0}
-  m_Controller: {fileID: 9100000, guid: 75c0e5b6b3997ae4989a14fd91ee99e6, type: 2}
-  m_CullingMode: 0
-  m_UpdateMode: 0
-  m_ApplyRootMotion: 0
-  m_LinearVelocityBlending: 0
-  m_WarningMessage: 
-  m_HasTransformHierarchy: 1
-  m_AllowConstantClipSamplingOptimization: 1
-  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!114 &49006555130519342
 MonoBehaviour:
   m_ObjectHideFlags: 0
