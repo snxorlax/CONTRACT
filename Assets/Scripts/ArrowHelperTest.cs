@@ -15,7 +15,7 @@ public class ArrowHelperTest : MonoBehaviour, IBeginDragHandler, IDragHandler, I
     }
     public void OnDrag(PointerEventData pointerEventData)
     {
-        arrow.GetComponent<ArrowScript>().DrawArrow(transform.position);
+        arrow.GetComponent<ArrowScript>().DrawArrow(transform.Find("ArrowOrigin").position);
     }
     public void OnEndDrag(PointerEventData pointerEventData)
     {
