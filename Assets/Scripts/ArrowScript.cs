@@ -2,12 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 public class ArrowScript : MonoBehaviour
 {
     public GameObject arrowHead;
     public GameObject bodySegment;
     public List<GameObject> allSegments, animatingSegments;
-    public Transform segments;
+    public Transform segments, segmentMask;
     public int numSegments;
     public float curveAngle;
     public float curveTilt;
@@ -16,11 +17,11 @@ public class ArrowScript : MonoBehaviour
     {
         for (int i = 0; i < numSegments; i++)
         {
-            GameObject newSegment = Instantiate(bodySegment, transform.position, Quaternion.identity, segments);
+            GameObject newSegment = Instantiate(bodySegment, transform.position, Quaternion.identity, segmentMask.Find("Offset"));
             allSegments.Add(newSegment);
 
         }
-        radius = 700f;
+        radius = 600f;
         InitPositions(numSegments);
         InitRotations();
     }
@@ -32,6 +33,7 @@ public class ArrowScript : MonoBehaviour
         RectTransformUtility.ScreenPointToLocalPointInRectangle(GetComponent<RectTransform>(), Input.mousePosition, Camera.main, out localPos);
         ShowArrow();
         PositionArrowHead();
+        FormatSegmentMask(localPos);
         RotateArrowHead(startPos);
         RotateArrow();
         AnimateArrow();
@@ -40,6 +42,18 @@ public class ArrowScript : MonoBehaviour
     public void PositionArrowHead()
     {
         arrowHead.transform.position = (Vector2)Camera.main.ScreenToWorldPoint(Input.mousePosition);
+    }
+    public void FormatSegmentMask(Vector2 localPos)
+    {
+        Image maskImage = segmentMask.GetComponent<Image>();
+        Vector2 segmentPos;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(segmentMask.GetComponent<RectTransform>(), Input.mousePosition, Camera.main, out segmentPos);
+        maskImage.rectTransform.sizeDelta = new Vector2(50, localPos.y - segments.transform.position.y);
+        Vector3 newPos = new Vector3 (0, -segments.localPosition.y + maskImage.rectTransform.rect.height/2, 0);
+        segmentMask.transform.localPosition = newPos;
+        newPos = new Vector3 (0, segments.localPosition.y - maskImage.rectTransform.rect.height/2 + radius, 0);
+        segmentMask.transform.Find("Offset").localPosition = newPos;
+
     }
     public void RotateArrowHead(Vector3 startPos)
     {
@@ -163,7 +177,11 @@ public class ArrowScript : MonoBehaviour
     public void FilterSegment(GameObject segment)
     {
         bool zRange = false;
-        bool yRange = false;
+        // bool yRange = false;
+        float ySegmentDiff = Mathf.Abs(segment.transform.position.y - transform.position.y);
+        float xSegmentDiff = Mathf.Abs(segment.transform.position.x - transform.position.x);
+        float yArrowDiff = Mathf.Abs(arrowHead.transform.position.y - transform.position.y);
+        float xArrowDiff = Mathf.Abs(arrowHead.transform.position.x - transform.position.x);
         if (segment.transform.localPosition.z < 0)
         {
             zRange = true;
@@ -172,16 +190,24 @@ public class ArrowScript : MonoBehaviour
         {
             zRange = false;
         }
-        if (segment.transform.localPosition.y > 0 && segment.transform.position.y < Mathf.Abs(arrowHead.transform.localPosition.y))
-        {
-            yRange = true;
-        }
-        else if (segment.transform.localPosition.y < 0 || segment.transform.localPosition.y > Mathf.Abs(arrowHead.transform.localPosition.y))
-        {
-            yRange = false;
-        }
+        // if (segment.transform.localPosition.y > 0)
+        // {
+        //     if ((yArrowDiff > .03f && xArrowDiff > .03f) && xSegmentDiff < xArrowDiff + .1f && ySegmentDiff < yArrowDiff +.1f)
+        //     {
+        //         yRange = true;
+        //     }
+        //     else if ((yArrowDiff < .05f && xSegmentDiff < xArrowDiff) || (xArrowDiff < .05f && ySegmentDiff < yArrowDiff))
+        //     {
+        //         // Debug.Log(yArrowDiff + " " + xArrowDiff);
+        //         yRange = true;
+        //     }
+        // }
+        // else if (segment.transform.localPosition.y < 0 || ySegmentDiff > yArrowDiff)
+        // {
+        //     yRange = false;
+        // }
 
-        if (zRange == true && yRange ==true)
+        if (zRange == true)
         {
             segment.SetActive(true);
         }
