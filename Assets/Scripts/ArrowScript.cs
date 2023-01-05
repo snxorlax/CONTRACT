@@ -21,9 +21,14 @@ public class ArrowScript : MonoBehaviour
             allSegments.Add(newSegment);
 
         }
+        InitArrow();
+    }
+    public void InitArrow()
+    {
         radius = 600f;
         InitPositions(numSegments);
         InitRotations();
+
     }
     public void DrawArrow(Vector3 startPos)
     {
@@ -34,8 +39,8 @@ public class ArrowScript : MonoBehaviour
         ShowArrow();
         PositionArrowHead();
         FormatSegmentMask(localPos);
-        RotateArrowHead(startPos);
         RotateArrow();
+        RotateArrowHead(startPos);
         AnimateArrow();
         SortSegments();
     }
@@ -59,9 +64,14 @@ public class ArrowScript : MonoBehaviour
     {
         Vector2 diff = Camera.main.ScreenToWorldPoint(Input.mousePosition) - startPos;
         diff.Normalize();
+        Vector2 localPos = GetComponent<RectTransform>().position;
+        RectTransformUtility.ScreenPointToLocalPointInRectangle(GetComponent<RectTransform>(), Input.mousePosition, Camera.main, out localPos);
 
         float rot_z = Mathf.Atan2(diff.y, diff.x) * Mathf.Rad2Deg;
-        arrowHead.transform.rotation = Quaternion.Euler(12f, 0f, rot_z - 90);
+        float rot_x = Mathf.Tan((Mathf.PI * localPos.y/(4*radius)) ) * Mathf.Rad2Deg;
+        rot_x = Mathf.Clamp(rot_x, -68, 68);
+
+        arrowHead.transform.localRotation = Quaternion.Euler(rot_x,0, 0);
     }
     public void InitPositions(int numSegments)
     {

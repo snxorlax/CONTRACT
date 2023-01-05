@@ -1,10 +1,11 @@
-Shader "MaskableDissolve"
+Shader "MaskableFrameDissolve"
 {
     Properties
     {
-        [NoScaleOffset]MainTexture("Image", 2D) = "white" {}
-        Color_89f7ac0962c1459c9090a5c6d8ae3085("DissolveColor", Color) = (0.4811321, 0.210944, 0.05673727, 1)
-        DissolveAmount("DissolveAmount", Float) = -0.35
+        MainColor("Color", Color) = (0.09433961, 0.08054467, 0.08054467, 1)
+        DissolveAmount("DissolveAmount", Float) = 0.43
+        DissolveColor("DissolveColor", Color) = (0.8207547, 0.3368192, 0.3368192, 1)
+        DissolveWidth("DissolveWidth", Float) = 0.51
         [HideInInspector]_EmissionColor("Color", Color) = (1, 1, 1, 1)
         [HideInInspector]_RenderQueueType("Float", Float) = 4
         [HideInInspector][ToggleUI]_AddPrecomputedVelocity("Boolean", Float) = 0
@@ -38,6 +39,7 @@ Shader "MaskableDissolve"
         [HideInInspector][ToggleUI]_TransparentBackfaceEnable("Boolean", Float) = 0
         [HideInInspector][ToggleUI]_EnableBlendModePreserveSpecularLighting("Boolean", Float) = 0
         [HideInInspector]_StencilRef("Float", Int) = 0
+        [HideInInspector]_StencilWriteMask("Float", Int) = 6
         [HideInInspector]_StencilRefDepth("Float", Int) = 0
         [HideInInspector]_StencilWriteMaskDepth("Float", Int) = 8
         [HideInInspector]_StencilRefMV("Float", Int) = 32
@@ -88,6 +90,8 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+        ZClip [_ZClip]
+
             // Debug
             // <None>
 
@@ -208,9 +212,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -219,9 +224,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -325,6 +327,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -352,6 +355,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -381,11 +385,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -394,6 +393,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -427,39 +465,17 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -698,6 +714,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "META"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -709,6 +727,7 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
             // Render State
             Cull Off
 
@@ -836,9 +855,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -847,9 +867,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -953,6 +970,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -980,6 +998,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -1009,11 +1028,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -1022,6 +1036,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -1051,41 +1104,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -1320,6 +1356,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "Picking"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -1331,6 +1369,7 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
             // Render State
             Cull [_CullMode]
 
@@ -1456,9 +1495,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -1467,9 +1507,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -1574,6 +1611,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -1601,6 +1639,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -1630,11 +1669,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -1643,6 +1677,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -1678,41 +1751,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -1953,6 +2009,11 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "SceneSelectionPass"
             }
+
+            // Render State
+            Cull Off
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -1964,8 +2025,6 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
-            // Render State
-            Cull Off
 
             // Debug
             // <None>
@@ -2090,9 +2149,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -2101,9 +2161,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -2207,6 +2264,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -2234,6 +2292,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -2263,11 +2322,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -2276,6 +2330,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -2311,41 +2404,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -2589,6 +2665,8 @@ Shader "MaskableDissolve"
 
             // Render State
             Cull [_CullMode]
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -2600,8 +2678,6 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
-        ZWrite Off
-
             // Debug
             // <None>
 
@@ -2733,9 +2809,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -2744,9 +2821,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -2882,6 +2956,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -2909,6 +2984,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -2938,11 +3014,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -2951,6 +3022,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -2986,41 +3096,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -3271,6 +3364,7 @@ Shader "MaskableDissolve"
             // Render State
             Cull [_CullMode]
         ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -3282,6 +3376,7 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
             // Debug
             // <None>
 
@@ -3413,9 +3508,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -3424,9 +3520,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -3562,6 +3655,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -3589,6 +3683,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -3618,11 +3713,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -3631,6 +3721,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -3666,41 +3795,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -3951,6 +4063,8 @@ Shader "MaskableDissolve"
             // Render State
             Cull [_CullModeForward]
         Blend [_SrcBlend] [_DstBlend], [_AlphaSrcBlend] [_AlphaDstBlend]
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -3962,7 +4076,6 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
-        ZWrite [_ZWrite]
 
             // Debug
             // <None>
@@ -4087,9 +4200,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -4098,9 +4212,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -4208,6 +4319,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -4235,6 +4347,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -4264,11 +4377,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -4277,6 +4385,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -4313,41 +4460,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             {
                 surface.VTPackedFeedback = float4(1.0f,1.0f,1.0f,.0f);
             }
@@ -4596,6 +4726,8 @@ Shader "MaskableDissolve"
 
             // Render State
             Cull [_CullMode]
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -4607,7 +4739,6 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
-        ZWrite Off
 
             // Debug
             // <None>
@@ -4727,9 +4858,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -4738,9 +4870,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -4845,6 +4974,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -4872,6 +5002,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -4901,11 +5032,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -4914,6 +5040,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -4949,41 +5114,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -5233,6 +5381,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "IndirectDXR"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -5244,6 +5394,7 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
 
             // Render State
             // RenderState: <None>
@@ -5366,9 +5517,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -5377,9 +5529,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -5488,6 +5637,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -5515,6 +5665,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -5544,11 +5695,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -5557,6 +5703,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -5592,41 +5777,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -5867,6 +6035,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "VisibilityDXR"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -5878,6 +6048,8 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
+
             // Render State
             // RenderState: <None>
 
@@ -5999,9 +6171,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -6010,9 +6183,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -6121,6 +6291,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -6148,6 +6319,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -6177,11 +6349,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -6190,6 +6357,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -6225,41 +6431,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -6500,6 +6689,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "ForwardDXR"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -6511,6 +6702,8 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
+
             // Render State
             // RenderState: <None>
 
@@ -6632,9 +6825,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -6643,9 +6837,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -6754,6 +6945,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -6781,6 +6973,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -6810,11 +7003,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -6823,6 +7011,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -6858,41 +7085,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -7133,6 +7343,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "GBufferDXR"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -7144,6 +7356,8 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
+
             // Render State
             // RenderState: <None>
 
@@ -7265,9 +7479,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -7276,9 +7491,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -7389,6 +7601,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -7416,6 +7629,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -7445,11 +7659,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -7458,6 +7667,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -7493,41 +7741,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 
@@ -7768,6 +7999,8 @@ Shader "MaskableDissolve"
             {
                 "LightMode" = "PathTracingDXR"
             }
+        ZWrite Off
+        
         ZTest [unity_GUIZTestMode]
         
         
@@ -7779,6 +8012,8 @@ Shader "MaskableDissolve"
             WriteMask [_StencilWriteMask]
         }
         ColorMask [_ColorMask]
+
+
             // Render State
             // RenderState: <None>
 
@@ -7899,9 +8134,10 @@ Shader "MaskableDissolve"
 
             // -- Graph Properties
             CBUFFER_START(UnityPerMaterial)
-        float4 MainTexture_TexelSize;
-        float4 Color_89f7ac0962c1459c9090a5c6d8ae3085;
+        float4 MainColor;
         float DissolveAmount;
+        float4 DissolveColor;
+        float DissolveWidth;
         float4 _EmissionColor;
         float _UseShadowThreshold;
         float4 _DoubleSidedConstants;
@@ -7910,9 +8146,6 @@ Shader "MaskableDissolve"
         CBUFFER_END
 
         // Object and Global properties
-        SAMPLER(SamplerState_Linear_Repeat);
-        TEXTURE2D(MainTexture);
-        SAMPLER(samplerMainTexture);
 
             // -- Property used by ScenePickingPass
             #ifdef SCENEPICKINGPASS
@@ -8020,6 +8253,7 @@ Shader "MaskableDissolve"
             return frac(sin(dot(uv, float2(12.9898, 78.233)))*43758.5453);
         }
 
+
         inline float Unity_SimpleNnoise_Interpolate_float (float a, float b, float t)
         {
             return (1.0-t)*a + (t*b);
@@ -8047,6 +8281,7 @@ Shader "MaskableDissolve"
             float t = Unity_SimpleNnoise_Interpolate_float(bottomOfGrid, topOfGrid, f.y);
             return t;
         }
+
         void Unity_SimpleNoise_float(float2 UV, float Scale, out float Out)
         {
             float t = 0.0;
@@ -8076,11 +8311,6 @@ Shader "MaskableDissolve"
             Out = clamp(In, Min, Max);
         }
 
-        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
-        {
-            Out = A * B;
-        }
-
         void Unity_Step_float(float Edge, float In, out float Out)
         {
             Out = step(Edge, In);
@@ -8089,6 +8319,45 @@ Shader "MaskableDissolve"
         void Unity_Subtract_float(float A, float B, out float Out)
         {
             Out = A - B;
+        }
+
+        void Unity_Multiply_float(float4 A, float4 B, out float4 Out)
+        {
+            Out = A * B;
+        }
+
+        struct Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84
+        {
+            half4 uv0;
+        };
+
+        void SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(float Vector1_316086d240204ad4ae20f9fb62a3d9c9, float Vector1_145ef39d70c5490d802f84d1fdb5cfe8, float4 Color_3defde16284240388f3c9f6503a36335, Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 IN, out float OutVector1_1, out float4 New_2)
+        {
+            float _Property_434b764f79de43c09373b49eec90b34f_Out_0 = Vector1_316086d240204ad4ae20f9fb62a3d9c9;
+            float _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3;
+            Unity_Remap_float(_Property_434b764f79de43c09373b49eec90b34f_Out_0, float2 (0, 1), float2 (0.5, 1.4), _Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3);
+            float _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1;
+            Unity_OneMinus_float(_Remap_ba654e36e0da4baf9ef533ec73308aa8_Out_3, _OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1);
+            float _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2;
+            Unity_SimpleNoise_float(IN.uv0.xy, 29, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2);
+            float _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2;
+            Unity_Add_float(_OneMinus_36a8777f6ba5448db4a16592d0d7f65a_Out_1, _SimpleNoise_c9128ca0e0d84af49295a475dd5cf3a4_Out_2, _Add_8c01400fcdd94c57b7f43859f2c06545_Out_2);
+            float _Remap_5abc049b67a542ad865aea290da3fd54_Out_3;
+            Unity_Remap_float(_Add_8c01400fcdd94c57b7f43859f2c06545_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_5abc049b67a542ad865aea290da3fd54_Out_3);
+            float _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            Unity_Clamp_float(_Remap_5abc049b67a542ad865aea290da3fd54_Out_3, 0, 1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3);
+            float _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0 = Vector1_145ef39d70c5490d802f84d1fdb5cfe8;
+            float _Step_a39dd1d4bf444370be689f8d2130d037_Out_2;
+            Unity_Step_float(_Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Property_578a2c2a79d84a999a1d3b3b34cab4ee_Out_0, _Step_a39dd1d4bf444370be689f8d2130d037_Out_2);
+            float _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1;
+            Unity_OneMinus_float(_Step_a39dd1d4bf444370be689f8d2130d037_Out_2, _OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1);
+            float _Subtract_09f418cb690a445784330fdcebef7a99_Out_2;
+            Unity_Subtract_float(_OneMinus_7f20bc220cf9442a9a382443094963bd_Out_1, _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3, _Subtract_09f418cb690a445784330fdcebef7a99_Out_2);
+            float4 _Property_f7263c384bb64d829822f46ce375e228_Out_0 = Color_3defde16284240388f3c9f6503a36335;
+            float4 _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
+            Unity_Multiply_float((_Subtract_09f418cb690a445784330fdcebef7a99_Out_2.xxxx), _Property_f7263c384bb64d829822f46ce375e228_Out_0, _Multiply_51565f18639f46f3af62b7693afa9569_Out_2);
+            OutVector1_1 = _Clamp_75140a9261de44f6a42ba51e97caa73c_Out_3;
+            New_2 = _Multiply_51565f18639f46f3af62b7693afa9569_Out_2;
         }
 
         void Unity_Add_float4(float4 A, float4 B, out float4 Out)
@@ -8124,41 +8393,24 @@ Shader "MaskableDissolve"
         SurfaceDescription SurfaceDescriptionFunction(SurfaceDescriptionInputs IN)
         {
             SurfaceDescription surface = (SurfaceDescription)0;
-            UnityTexture2D _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0 = UnityBuildTexture2DStructNoScale(MainTexture);
-            float4 _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0 = SAMPLE_TEXTURE2D(_Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.tex, _Property_54f20940fd8743d7bfaf3eb6f2574205_Out_0.samplerstate, IN.uv0.xy);
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_R_4 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.r;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_G_5 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.g;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_B_6 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.b;
-            float _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_A_7 = _SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0.a;
-            float _Property_d20ad87afb6641b4b198620f4fa0541c_Out_0 = DissolveAmount;
-            float _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3;
-            Unity_Remap_float(_Property_d20ad87afb6641b4b198620f4fa0541c_Out_0, float2 (-1, 1), float2 (0, 1), _Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3);
-            float _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1;
-            Unity_OneMinus_float(_Remap_c55955ec67bb4cfa983afcf75cd45f82_Out_3, _OneMinus_fa5186fa570f418b8670719d883816c5_Out_1);
-            float _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2;
-            Unity_SimpleNoise_float(IN.uv0.xy, 30.7, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2);
-            float _Add_a746940835b643b8813f41b2ff41a230_Out_2;
-            Unity_Add_float(_OneMinus_fa5186fa570f418b8670719d883816c5_Out_1, _SimpleNoise_8e5735dd9e124816b670038ae51bd986_Out_2, _Add_a746940835b643b8813f41b2ff41a230_Out_2);
-            float _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3;
-            Unity_Remap_float(_Add_a746940835b643b8813f41b2ff41a230_Out_2, float2 (0, 1), float2 (-4, 4), _Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3);
-            float _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3;
-            Unity_Clamp_float(_Remap_62992a0ee44e47b1b3eb50ebc9b3fcdd_Out_3, 0, 1, _Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3);
-            float4 _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2;
-            Unity_Multiply_float(_SampleTexture2D_771f6435dff8413b9ed7a0aa67c13b78_RGBA_0, (_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3.xxxx), _Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2);
-            float _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2;
-            Unity_Step_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, 0.12, _Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2);
-            float _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1;
-            Unity_OneMinus_float(_Step_db6f6b311e2f49a09c2a28dffb64ea22_Out_2, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1);
-            float _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2;
-            Unity_Subtract_float(_Clamp_694eb3ddc41f4f13b29481e1f9526ae4_Out_3, _OneMinus_089b443d1bf042528dbf16346db3a55b_Out_1, _Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2);
-            float4 _Property_af9042061251422fa8cfe7d234bc6a80_Out_0 = Color_89f7ac0962c1459c9090a5c6d8ae3085;
-            float4 _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2;
-            Unity_Multiply_float((_Subtract_551ca6ed5e1649429cc0e1ba4d543640_Out_2.xxxx), _Property_af9042061251422fa8cfe7d234bc6a80_Out_0, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2);
-            float4 _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2;
-            Unity_Add_float4(_Multiply_8574e2202ab044d886a84e76e0ab0957_Out_2, _Multiply_7f77ccb1bb5f4a048454ce6d0afdabbc_Out_2, _Add_b8779097307f47e4ae1e09d3cf70268e_Out_2);
-            surface.BaseColor = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2.xyz);
+            float4 _Property_5c641c80a7114a7a897db1cb02159ae4_Out_0 = MainColor;
+            float _Property_de251e4a24c14aa0856150bddc49065c_Out_0 = DissolveAmount;
+            float _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0 = DissolveWidth;
+            float4 _Property_bebea618373945ebb419ef89c5cf5212_Out_0 = DissolveColor;
+            Bindings_DestroySubgraph_4879eac7be368a24b89191108d7dfe84 _DestroySubgraph_afbfe8c069574b039023716130b42f5c;
+            _DestroySubgraph_afbfe8c069574b039023716130b42f5c.uv0 = IN.uv0;
+            float _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1;
+            float4 _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2;
+            SG_DestroySubgraph_4879eac7be368a24b89191108d7dfe84(_Property_de251e4a24c14aa0856150bddc49065c_Out_0, _Property_b24b9bb5dc564be4993793f1fcc7e05a_Out_0, _Property_bebea618373945ebb419ef89c5cf5212_Out_0, _DestroySubgraph_afbfe8c069574b039023716130b42f5c, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2);
+            float4 _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2;
+            Unity_Multiply_float(_Property_5c641c80a7114a7a897db1cb02159ae4_Out_0, (_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2);
+            float4 _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2;
+            Unity_Add_float4(_Multiply_7dd12feaaceb4d7190bcbebc5366c02b_Out_2, _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_d811380c5b67453ebf47a3892c98dfdd_Out_2);
+            float4 _Add_71342030a3be42c4a0edd334996e1c9e_Out_2;
+            Unity_Add_float4((_DestroySubgraph_afbfe8c069574b039023716130b42f5c_OutVector1_1.xxxx), _DestroySubgraph_afbfe8c069574b039023716130b42f5c_New_2, _Add_71342030a3be42c4a0edd334996e1c9e_Out_2);
+            surface.BaseColor = (_Add_d811380c5b67453ebf47a3892c98dfdd_Out_2.xyz);
             surface.Emission = float3(0, 0, 0);
-            surface.Alpha = (_Add_b8779097307f47e4ae1e09d3cf70268e_Out_2).x;
+            surface.Alpha = (_Add_71342030a3be42c4a0edd334996e1c9e_Out_2).x;
             return surface;
         }
 

@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-3823114130282009841
+--- !u!114 &-7549484721836786936
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
@@ -20,9 +20,10 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CardFrameMaterial
-  m_Shader: {fileID: 4800000, guid: 28458fd55e7f6ab4fb26330efe508ae0, type: 3}
-  m_ShaderKeywords: _SURFACE_TYPE_TRANSPARENT
+  m_Name: MaskableDisolveandFade
+  m_Shader: {fileID: 4800000, guid: d05fa79ca0e716f42ac908b7a0dad1f3, type: 3}
+  m_ShaderKeywords: _DISABLE_SSR_TRANSPARENT _ENABLE_FOG_ON_TRANSPARENT _NORMALMAP_TANGENT_SPACE
+    _SURFACE_TYPE_TRANSPARENT
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -39,8 +40,8 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - Texture2D_534c0e5efa30459d9d2654cda8b520c4:
-        m_Texture: {fileID: 2800000, guid: 0bb974c4e4b51664492686064ac9108e, type: 3}
+    - MainTexture:
+        m_Texture: {fileID: 2800000, guid: c7a32512bd8d6ed4fbd2f1a70e570ebc, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _AnisotropyMap:
@@ -136,11 +137,8 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Floats:
-    - ClipThreshold: 0.48
-    - DissolveAmount: -0.4
-    - DissolveWidth: 0.51
-    - Vector1_4c0e7e78ad7c4ee88a76deff3e05d456: 0.0001
-    - Vector1_e58c42f2c20c4f34afe3f0b3b724c7a0: -0.47
+    - DissolveAmount: 0
+    - DissolveWidth: 0
     - _AORemapMax: 1
     - _AORemapMin: 0
     - _ATDistance: 1
@@ -179,7 +177,7 @@ Material:
     - _EmissiveIntensity: 1
     - _EmissiveIntensityUnit: 0
     - _EnableBlendModePreserveSpecularLighting: 1
-    - _EnableFogOnTransparent: 0
+    - _EnableFogOnTransparent: 1
     - _EnableGeometricSpecularAA: 0
     - _EnergyConservingSpecularColor: 1
     - _HeightAmplitude: 0.02
@@ -253,16 +251,13 @@ Material:
     - _UVEmissive: 0
     - _UseEmissiveIntensity: 0
     - _UseShadowThreshold: 0
-    - _UseUIAlphaClip: 0
     - _ZTestDepthEqualForOpaque: 4
     - _ZTestGBuffer: 4
     - _ZTestTransparent: 4
     - _ZWrite: 0
     m_Colors:
-    - Color_3df0c303892b41958fd58b9d3dc712bc: {r: 0.5377358, g: 0.23082057, b: 0.23082057, a: 1}
-    - Color_ba9ca6e9b6584cb09674ac3ad0bd1f0d: {r: 0.39607847, g: 0.2901961, b: 0.003921569, a: 1}
-    - DissolveColor: {r: 0.8207547, g: 0.33681917, b: 0.33681917, a: 1}
-    - MainColor: {r: 0.6, g: 0.45098042, b: 0.2392157, a: 1}
+    - DissolveColor: {r: 0.9339623, g: 0.4537647, b: 0.4537647, a: 0}
+    - MainTextureColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}

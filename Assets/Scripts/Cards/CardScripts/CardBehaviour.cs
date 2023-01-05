@@ -11,6 +11,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     public Card card;
     //Targeting Arrow
     public GameObject arrow;
+    public Transform arrowOrigin;
     //GameObjects associated with localPlayer
     public GameObject player, handZone, playerField, enemyField, playerAvatar, enemyAvatar, playerUtility, playerDiscard, mainBoard;
     //Indicator associated with this object
@@ -197,7 +198,8 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             //check for all the attacking prerequisites: your turn, your card, the card is on the field, and it is the second turn of the game, and correct mouse button is used
             else if (!card.shroud && playerManager.isTurn && hasAuthority && card.currentZone == "Field" && canAttack && gameManager.turnNumber > 1 && pointerEventData.button == PointerEventData.InputButton.Left)
             {
-                arrow.GetComponent<ArrowScript>().DrawArrow(transform.position);
+                Cursor.visible = false;
+                arrow.GetComponent<ArrowScript>().DrawArrow(arrowOrigin.position);
                 isTargeting = true;
                 //Highlight available targets for attacking
                 if (enemyField.transform.childCount > 0)
@@ -260,6 +262,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public void OnEndDrag(PointerEventData pointerEventData)
     {
+        Cursor.visible = true;
         arrow.GetComponent<ArrowScript>().HideArrow();
         if (interactable)
         {
@@ -418,6 +421,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     }
     public void OnDrop(PointerEventData pointerEventData)
     {
+        Debug.Log("Drop test");
         if (pointerEventData.pointerDrag.GetComponent<CardBehaviour>().canAttack)
         {
             if (pointerEventData.pointerDrag.GetComponent<CardBehaviour>().isTargeting && transform.parent == enemyField.transform)
