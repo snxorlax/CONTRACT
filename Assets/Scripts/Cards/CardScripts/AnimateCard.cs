@@ -12,7 +12,7 @@ public class AnimateCard : NetworkBehaviour
     // Animator used by animHelper
     public Animator helpAnimator;
     //Transforms for changing views
-    public Transform handFront, back, fieldFrontPlayer, fieldFrontEnemy;
+    public Transform handFront, back, fieldFront;
     public Transform mainBoard;
     //Prefab for destroying and creating
     public GameObject cardDestroy;
@@ -111,9 +111,9 @@ public class AnimateCard : NetworkBehaviour
     {
         //Switches from handview to fieldview
         handFront.gameObject.SetActive(false);
-        fieldFrontPlayer.gameObject.SetActive(true);
-        fieldFrontPlayer.transform.localScale = handFront.transform.localScale;
-        fieldFrontPlayer.transform.localPosition = handFront.transform.localPosition;
+        fieldFront.gameObject.SetActive(true);
+        fieldFront.transform.localScale = handFront.transform.localScale;
+        fieldFront.transform.localPosition = handFront.transform.localPosition;
         handFront.transform.localScale = new Vector3(1,1,1);
         GameObject.Find("PlayZoneIndicator").GetComponent<Image>().enabled = false;
         if (!card)
@@ -123,10 +123,10 @@ public class AnimateCard : NetworkBehaviour
         StartCoroutine(AnimateCompletePlayerPlay());
     }
     public IEnumerator AnimateCompletePlayerPlay(){
-        while (Vector2.Distance(fieldFrontPlayer.localPosition, Vector2.zero) > .01f || fieldFrontPlayer.localScale != new Vector3(1,1,1))
+        while (Vector2.Distance(fieldFront.localPosition, Vector2.zero) > .01f || fieldFront.localScale != new Vector3(1,1,1))
         {
-            fieldFrontPlayer.localScale = Vector3.Lerp(fieldFrontPlayer.localScale, new Vector3(1,1,1), .3f);
-            fieldFrontPlayer.localPosition = Vector2.Lerp(fieldFrontPlayer.localPosition, Vector2.zero, .1f);
+            fieldFront.localScale = Vector3.Lerp(fieldFront.localScale, new Vector3(1,1,1), .3f);
+            fieldFront.localPosition = Vector2.Lerp(fieldFront.localPosition, Vector2.zero, .1f);
             yield return null;
         }
         CompleteAction();
@@ -144,10 +144,10 @@ public class AnimateCard : NetworkBehaviour
     public void CompleteEnemyPlay()
     {
         //switches view from handview to fieldview
-        fieldFrontEnemy.gameObject.SetActive(true);
-        fieldFrontEnemy.localScale = animHelper.transform.Find("Views").Find("HandView").Find("Front").localScale;
+        fieldFront.gameObject.SetActive(true);
+        fieldFront.localScale = animHelper.transform.Find("Views").Find("HandView").Find("Front").localScale;
         transform.rotation = Quaternion.identity;
-        fieldFrontEnemy.position = animHelper.position;
+        fieldFront.position = animHelper.position;
         if (!card)
         {
             card = GetComponent<CardDisplay>().card;
@@ -155,10 +155,10 @@ public class AnimateCard : NetworkBehaviour
         StartCoroutine(CompleteEnemyPlayAnimation());
     }
     public IEnumerator CompleteEnemyPlayAnimation(){
-        while (Vector2.Distance(fieldFrontEnemy.localPosition, Vector2.zero) > .01f)
+        while (Vector2.Distance(fieldFront.localPosition, Vector2.zero) > .01f)
         {
-            fieldFrontEnemy.localScale = Vector3.Lerp(fieldFrontEnemy.localScale, new Vector3(1,1,1), .3f);
-            fieldFrontEnemy.localPosition = Vector2.Lerp(fieldFrontEnemy.localPosition, Vector2.zero, .1f);
+            fieldFront.localScale = Vector3.Lerp(fieldFront.localScale, new Vector3(1,1,1), .3f);
+            fieldFront.localPosition = Vector2.Lerp(fieldFront.localPosition, Vector2.zero, .1f);
             yield return null;
         }
         CompleteAction();
@@ -167,9 +167,6 @@ public class AnimateCard : NetworkBehaviour
     //Destroys card, currently in 2 parts
     public void StartDestroyCard()
     {
-        cardDestroy.transform.GetChild(0).gameObject.SetActive(true);
-        cardDestroy.transform.SetParent(transform.parent, playerManager.playerFieldArea);
-        cardDestroy.GetComponent<Animator>().Play("Base Layer.FieldDestroy", -1, 0);
     }
     public IEnumerator AnimateDestroyCard()
     {

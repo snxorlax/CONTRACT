@@ -303,6 +303,19 @@ public class PlayerManager : NetworkBehaviour
     }
     public IEnumerator DrawCardEnemy(GameObject card, int cardNo)
     {
+        //Reposition card elements for enemy unit, needs to be refactored
+        GameObject fieldStatBox = card.GetComponent<CardDisplay>().fieldStatBox;
+        GameObject fieldArt = card.GetComponent<CardDisplay>().unitFieldArt.transform.parent.gameObject;
+        GameObject fieldInner = card.GetComponent<CardDisplay>().unitFieldFrameInner.gameObject;
+        GameObject fieldShadow = card.GetComponent<CardDisplay>().unitFieldFrameShadow.gameObject;
+        GameObject cardBackground = card.GetComponent<CardDisplay>().unitFieldFrameInner.transform.parent.parent.Find("CardBackground").gameObject;
+        Vector3 enemyStatPos = new Vector3( fieldStatBox.transform.localPosition.x, -fieldStatBox.transform.localPosition.y, fieldStatBox.transform.localPosition.z);
+        fieldStatBox.transform.localPosition = enemyStatPos;
+        Vector3 enemyArtPos = new Vector3( fieldArt.transform.localPosition.x, -fieldArt.transform.localPosition.y, fieldArt.transform.localPosition.z);
+        fieldArt.transform.localPosition = enemyArtPos;
+        fieldInner.transform.localPosition = enemyArtPos;
+        fieldShadow.transform.localPosition = enemyArtPos;
+        cardBackground.transform.localPosition = enemyArtPos;
         //Reset bools to false to begin coroutine
         actionComplete = false;
         gameManager.actionComplete = false;
@@ -524,7 +537,6 @@ public class PlayerManager : NetworkBehaviour
                 playerField.Remove(card);
                 card.transform.Find("Back").gameObject.SetActive(false);
                 card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
-                card.transform.Find("Front").Find("StatBoxField").gameObject.SetActive(false);
                 UpdatePlayerUnitCount(-1);
             }
             else if (playerUtility.Contains(card))

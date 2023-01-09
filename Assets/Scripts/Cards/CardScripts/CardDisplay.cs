@@ -9,6 +9,7 @@ public class CardDisplay : MonoBehaviour
     //Scriptable Object card associated with this GameObject
     public Card card;
     public Material cardMat, artMat;
+    public GameObject fieldDestroy;
     //List of lists to be updated, based on what current card contains. Can be useful if differentiating a card from an animator
     public List<List<Image>> frameLists = new List<List<Image>>();
     public List<List<Image>> attackImageLists = new List<List<Image>>(); 
@@ -47,34 +48,41 @@ public class CardDisplay : MonoBehaviour
     public TextMeshProUGUI cardTypeText;
     public TextMeshProUGUI cardText;
 
-    [Header ("FieldView Properties, Player, Unit")]
-    public Image playerFieldArt; 
-    public Image playerFieldFrameOuter, playerFieldFrameMain, playerFieldFrameInner, playerFieldFrameShadow;
+    [Header ("FieldView Properties, Unit")]
+    public Image unitFieldArt; 
+    public Image unitFieldFrameOuter, unitFieldFrameMain, unitFieldFrameInner, unitFieldFrameShadow;
 
-    [Header ("FieldView BattleStats, Player, Unit")]
-    public Image playerFieldAttackFrame;
-    public Image playerFieldAttackBackground_1, playerFieldAttackBackground_2, playerFieldAttackBackground_3;
-    public Image playerFieldHealthFrame, playerFieldHealthBackground_1, playerFieldHealthBackground_2, playerFieldHealthBackground_3;
-    public TextMeshProUGUI playerFieldAttackText, playerFieldHealthText;
-
-    [Header ("FieldView Properties, Enemy, Unit")]
-    public Image enemyFieldArt; 
-    public Image enemyFieldFrameOuter, enemyFieldFrameMain, enemyFieldFrameInner, enemyFieldFrameShadow;
-
-    [Header ("FieldView BattleStats, Enemy, Unit")]
-    public Image enemyFieldAttackFrame;
-    public Image enemyFieldAttackBackground_1, enemyFieldAttackBackground_2, enemyFieldAttackBackground_3;
-    public Image enemyFieldHealthFrame, enemyFieldHealthBackground_1, enemyFieldHealthBackground_2, enemyFieldHealthBackground_3;
-    public TextMeshProUGUI enemyFieldAttackText, enemyFieldHealthText;
+    [Header ("FieldView BattleStats, Unit")]
+    public GameObject fieldStatBox;
+    public Image FieldAttackFrame;
+    public Image FieldAttackBackground_1, FieldAttackBackground_2, FieldAttackBackground_3;
+    public Image FieldHealthFrame, FieldHealthBackground_1, FieldHealthBackground_2, FieldHealthBackground_3;
+    public TextMeshProUGUI FieldAttackText, FieldHealthText;
 
     [Header("FieldView Properties, Relic")]
     public Image relicFieldArt;
+    [Header("FieldDestroy, PlayerUnit, TL")]
+    public Image playerFieldDestroyArtTL;
+    public Image playerFieldDestroyFrameOuterTL, playerFieldDestroyFrameMainTL, playerFieldDestroyFrameInnerTL, playerFieldDestroyFrameShadowTL;
+    [Header("FieldDestroy, PlayerUnit, BR")]
+    public Image playerFieldDestroyArtBR;
+    public Image playerFieldDestroyFrameOuterBR, playerFieldDestroyFrameMainBR, playerFieldDestroyFrameInnerBR, playerFieldDestroyFrameShadowBR;
+    [Header("FieldDestroy, EnemyUnit, TL")]
+    public Image enemyFieldDestroyArtTL;
+    public Image enemyFieldDestroyFrameOuterTL, enemyFieldDestroyFrameMainTL, enemyFieldDestroyFrameInnerTL, enemyFieldDestroyFrameShadowTL;
+    [Header("FieldDestroy, EnemyUnit, BR")]
+    public Image enemyFieldDestroyArtBR;
+    public Image enemyFieldDestroyFrameOuterBR, enemyFieldDestroyFrameMainBR, enemyFieldDestroyFrameInnerBR, enemyFieldDestroyFrameShadowBR;
+    [Header("FieldDestroy, Relic, TL")]
+    public Image fieldDestroyRelicArtTL;
+    [Header("FieldDestroy, Relic, BR")]
+    public Image fieldDestroyRelicArtBR;
 
     [Header ("Lists for Assigning Colors")]
     public List<Image> handFrameImages;
-    public List<Image> playerUnitImages, enemyUnitImages;
-    public List<Image> handAttackImages, playerAttackImages, enemyAttackImages;
-    public List<Image>  handHealthImages, playerHealthImages, enemyHealthImages;
+    public List<Image> unitFieldImages;
+    public List<Image> handAttackImages, fieldAttackImages;
+    public List<Image>  handHealthImages, fieldHealthImages;
 
     //Preset color combinations for different card types
     [Header("CardType Color Presets")]
@@ -108,25 +116,23 @@ public class CardDisplay : MonoBehaviour
         if (fieldViewUnit)
         {
             //add player and enemy frames to be colored
-            frameLists.Add(playerUnitImages);
-            frameLists.Add(enemyUnitImages);
-            //add player and enemy attack to be colored
-            attackImageLists.Add(playerAttackImages);
-            attackImageLists.Add(enemyAttackImages);
-            //add player and enemy health to be colored
-            healthImageLists.Add(playerHealthImages);
-            healthImageLists.Add(enemyHealthImages);
+            frameLists.Add(unitFieldImages);
+            //add unitattack and enemy attack to be colored
+            attackImageLists.Add(fieldAttackImages);
+            //add unit health to be colored
+            healthImageLists.Add(fieldHealthImages);
             //add player and enemy art to be assigned proper sprite
-            artList.Add(playerFieldArt);
-            artList.Add(enemyFieldArt);
+            artList.Add(unitFieldArt);
             artList.Add(relicFieldArt);
             //add player and enemy text to be updated
-            attackTextList.Add(playerFieldAttackText);
-            attackTextList.Add(enemyFieldAttackText);
-            healthTextList.Add(playerFieldHealthText);
-            healthTextList.Add(enemyFieldHealthText);
+            attackTextList.Add(FieldAttackText);
+            healthTextList.Add(FieldHealthText);
         }
-        // SetCardProperties();
+        if (fieldDestroy)
+        {
+
+        }
+
     }
     //Main function to set art, colors, stats, text and effects for each applicable view of card
     public void SetCardProperties()
