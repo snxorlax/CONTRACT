@@ -147,23 +147,23 @@ public class PlayerManager : NetworkBehaviour
         RpcStartPlayer(newPlayer);
     }
     [ClientRpc]
-    public void RpcStartPlayer(GameObject player)
+    public void RpcStartPlayer(GameObject playerAvatar)
     {
         playerDeck.AddRange(deck.mainDeck);
         UpdateDeckCount();
         if (hasAuthority)
         {
-            player.transform.SetParent(playerAvatarZone.transform, false);
-            player.GetComponent<PlayerDisplay>().playerInfo = Instantiate(playerInfo);
-            player.GetComponent<PlayerDisplay>().SetPlayerProperties();
-            gameManager.player = player;
+            playerAvatar.transform.SetParent(playerAvatarZone.transform, false);
+            playerAvatar.GetComponent<PlayerDisplay>().playerInfo = Instantiate(playerInfo);
+            playerAvatar.GetComponent<PlayerDisplay>().SetPlayerProperties();
+            gameManager.playerAvatar = playerAvatar;
         }
         if (!hasAuthority)
         {
-            player.transform.SetParent(enemyAvatarZone.transform, false);
-            player.GetComponent<PlayerDisplay>().playerInfo = Instantiate(playerInfo);
-            player.GetComponent<PlayerDisplay>().SetPlayerProperties();
-            gameManager.enemy = player;
+            playerAvatar.transform.SetParent(enemyAvatarZone.transform, false);
+            playerAvatar.GetComponent<PlayerDisplay>().playerInfo = Instantiate(playerInfo);
+            playerAvatar.GetComponent<PlayerDisplay>().SetPlayerProperties();
+            gameManager.enemyAvatar = playerAvatar;
         }
         if (isLocalPlayer)
         {
@@ -303,19 +303,6 @@ public class PlayerManager : NetworkBehaviour
     }
     public IEnumerator DrawCardEnemy(GameObject card, int cardNo)
     {
-        //Reposition card elements for enemy unit, needs to be refactored
-        GameObject fieldStatBox = card.GetComponent<CardDisplay>().fieldStatBox;
-        GameObject fieldArt = card.GetComponent<CardDisplay>().unitFieldArt.transform.parent.gameObject;
-        GameObject fieldInner = card.GetComponent<CardDisplay>().unitFieldFrameInner.gameObject;
-        GameObject fieldShadow = card.GetComponent<CardDisplay>().unitFieldFrameShadow.gameObject;
-        GameObject cardBackground = card.GetComponent<CardDisplay>().unitFieldFrameInner.transform.parent.parent.Find("CardBackground").gameObject;
-        Vector3 enemyStatPos = new Vector3( fieldStatBox.transform.localPosition.x, -fieldStatBox.transform.localPosition.y, fieldStatBox.transform.localPosition.z);
-        fieldStatBox.transform.localPosition = enemyStatPos;
-        Vector3 enemyArtPos = new Vector3( fieldArt.transform.localPosition.x, -fieldArt.transform.localPosition.y, fieldArt.transform.localPosition.z);
-        fieldArt.transform.localPosition = enemyArtPos;
-        fieldInner.transform.localPosition = enemyArtPos;
-        fieldShadow.transform.localPosition = enemyArtPos;
-        cardBackground.transform.localPosition = enemyArtPos;
         //Reset bools to false to begin coroutine
         actionComplete = false;
         gameManager.actionComplete = false;
@@ -535,7 +522,6 @@ public class PlayerManager : NetworkBehaviour
             if (playerField.Contains(card))
             {
                 playerField.Remove(card);
-                card.transform.Find("Back").gameObject.SetActive(false);
                 card.transform.Find("VFX").Find("Shroud").GetComponent<VisualEffect>().enabled = false;
                 UpdatePlayerUnitCount(-1);
             }
@@ -561,7 +547,7 @@ public class PlayerManager : NetworkBehaviour
             this.GetComponent<Display>().DisplayHorizontal(playerUtility, Display.fieldOffset);
 
         }
-        destroyQueue.Clear();
+        // destroyQueue.Clear();
         gameManager.GraveyardUpdate?.Invoke();
         // Waits until destroyQueue is empty before completing coroutine
         while (destroyQueue.Count > 0)
@@ -581,12 +567,12 @@ public class PlayerManager : NetworkBehaviour
             if (!card.GetComponent<NetworkIdentity>().hasAuthority)
             {
                 card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
-                card.transform.SetParent(enemyDiscardArea.transform, false);
+                // card.transform.SetParent(enemyDiscardArea.transform, false);
                 enemyDiscard.Add(card);
             }
             else if (card.GetComponent<NetworkIdentity>().hasAuthority)
             {
-                card.transform.SetParent(playerDiscardArea.transform, false);
+                // card.transform.SetParent(playerDiscardArea.transform, false);
                 playerDiscard.Add(card);
             }
             if (playerField.Contains(card))

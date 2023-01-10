@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using Mirror;
 
-public class CardDisplay : MonoBehaviour
+public class CardDisplay : NetworkBehaviour
 {
     //Scriptable Object card associated with this GameObject
     public Card card;
@@ -14,6 +15,7 @@ public class CardDisplay : MonoBehaviour
     public List<List<Image>> frameLists = new List<List<Image>>();
     public List<List<Image>> attackImageLists = new List<List<Image>>(); 
     public List<List<Image>> healthImageLists = new List<List<Image>>();
+    public List<List<GameObject>> repositionLists = new List<List<GameObject>>();
     //List of art in different views
     public List<Image> artList;
     //List of battle text in different views
@@ -61,18 +63,14 @@ public class CardDisplay : MonoBehaviour
 
     [Header("FieldView Properties, Relic")]
     public Image relicFieldArt;
-    [Header("FieldDestroy, PlayerUnit, TL")]
-    public Image playerFieldDestroyArtTL;
-    public Image playerFieldDestroyFrameOuterTL, playerFieldDestroyFrameMainTL, playerFieldDestroyFrameInnerTL, playerFieldDestroyFrameShadowTL;
-    [Header("FieldDestroy, PlayerUnit, BR")]
-    public Image playerFieldDestroyArtBR;
-    public Image playerFieldDestroyFrameOuterBR, playerFieldDestroyFrameMainBR, playerFieldDestroyFrameInnerBR, playerFieldDestroyFrameShadowBR;
-    [Header("FieldDestroy, EnemyUnit, TL")]
-    public Image enemyFieldDestroyArtTL;
-    public Image enemyFieldDestroyFrameOuterTL, enemyFieldDestroyFrameMainTL, enemyFieldDestroyFrameInnerTL, enemyFieldDestroyFrameShadowTL;
-    [Header("FieldDestroy, EnemyUnit, BR")]
-    public Image enemyFieldDestroyArtBR;
-    public Image enemyFieldDestroyFrameOuterBR, enemyFieldDestroyFrameMainBR, enemyFieldDestroyFrameInnerBR, enemyFieldDestroyFrameShadowBR;
+    [Header("FieldDestroy, Unit, TL")]
+    public Image fieldDestroyUnitArtTL;
+    public Image fieldDestroyFrameOuterTL, fieldDestroyFrameMainTL, fieldDestroyFrameInnerTL, fieldDestroyFrameShadowTL;
+    public TextMeshProUGUI destroyAttackTextTL, destroyHealthTextTL;
+    [Header("FieldDestroy, Unit, BR")]
+    public Image fieldDestroyUnitArtBR;
+    public Image fieldDestroyFrameOuterBR, fieldDestroyFrameMainBR, fieldDestroyFrameInnerBR, fieldDestroyFrameShadowBR;
+    public TextMeshProUGUI destroyAttackTextBR, destroyHealthTextBR;
     [Header("FieldDestroy, Relic, TL")]
     public Image fieldDestroyRelicArtTL;
     [Header("FieldDestroy, Relic, BR")]
@@ -83,6 +81,12 @@ public class CardDisplay : MonoBehaviour
     public List<Image> unitFieldImages;
     public List<Image> handAttackImages, fieldAttackImages;
     public List<Image>  handHealthImages, fieldHealthImages;
+    public List<Image> unitDestroyImagesTL, unitDestroyImagesBR, attackDestroyImagesTL, attackDestroyImagesBR, healthDestroyImagesTL, healthDestroyImagesBR;
+
+    [Header ("Reposition Lists")]
+    public List<GameObject> fieldReposition;
+    public List<GameObject> destroyReposition;
+
 
     //Preset color combinations for different card types
     [Header("CardType Color Presets")]
@@ -127,10 +131,32 @@ public class CardDisplay : MonoBehaviour
             //add player and enemy text to be updated
             attackTextList.Add(FieldAttackText);
             healthTextList.Add(FieldHealthText);
+            //add relevant gameobjects to repositionlist to be positioned at runtime based on authority
+            repositionLists.Add(fieldReposition);
         }
         if (fieldDestroy)
         {
-
+            //add player and enemy frames to be colored
+            frameLists.Add(unitDestroyImagesTL);
+            frameLists.Add(unitDestroyImagesBR);
+            //add TL and BR attack images
+            attackImageLists.Add(attackDestroyImagesTL);
+            attackImageLists.Add(attackDestroyImagesBR);
+            //add TL and BR health images
+            healthImageLists.Add(healthDestroyImagesTL);
+            healthImageLists.Add(healthDestroyImagesBR);
+            //add player and enemy art to be assigned proper sprite
+            artList.Add(fieldDestroyRelicArtTL);
+            artList.Add(fieldDestroyRelicArtBR);
+            artList.Add(fieldDestroyUnitArtTL);
+            artList.Add(fieldDestroyUnitArtBR);
+            //add player and enemy text to be updated
+            attackTextList.Add(destroyAttackTextTL);
+            attackTextList.Add(destroyAttackTextBR);
+            healthTextList.Add(destroyHealthTextTL);
+            healthTextList.Add(destroyHealthTextBR);
+            //add relevant gameobjects to repositionlist to be positioned at runtime based on authority
+            repositionLists.Add(destroyReposition);
         }
 
     }
@@ -142,6 +168,7 @@ public class CardDisplay : MonoBehaviour
             SetArt();
             SetColors();
             SetStats();
+            SetPlayerandEnemyPositions();
             SetText();
             SetCardEffects();
             cardBehaviour.SetCard();
@@ -173,6 +200,8 @@ public class CardDisplay : MonoBehaviour
                     //Apply henchman colors to frames of all views
                     foreach (List<Image> f in frameLists)
                     {
+                        f[i].material = new Material(f[i].material);
+                        f[i].material.SetColor("MainColor", henchmanColors[i]);
                         f[i].color = henchmanColors[i];
                     }
                 }
@@ -181,10 +210,14 @@ public class CardDisplay : MonoBehaviour
                     //Apply attack/health colors to all views
                     foreach (List<Image> a in attackImageLists)
                     {
+                        a[i].material = new Material(a[i].material);
+                        a[i].material.SetColor("MainColor", attackColors[i]);
                         a[i].color = attackColors[i];
                     }
                     foreach (List<Image> h in healthImageLists)
                     {
+                        h[i].material = new Material(h[i].material);
+                        h[i].material.SetColor("MainColor", henchmanHealthColors[i]);
                         h[i].color = henchmanHealthColors[i];
                     }
                 }
@@ -214,6 +247,8 @@ public class CardDisplay : MonoBehaviour
                 {
                     foreach (List<Image> f in frameLists)
                     {
+                        f[i].material = new Material(f[i].material);
+                        f[i].material.SetColor("MainColor", villainColors[i]);
                         f[i].color = villainColors[i];
                     }
                 }
@@ -222,10 +257,14 @@ public class CardDisplay : MonoBehaviour
                 {
                     foreach (List<Image> a in attackImageLists)
                     {
+                        a[i].material = new Material(a[i].material);
+                        a[i].material.SetColor("MainColor", attackColors[i]);
                         a[i].color = attackColors[i];
                     }
                     foreach (List<Image> h in healthImageLists)
                     {
+                        h[i].material = new Material(h[i].material);
+                        h[i].material.SetColor("MainColor", villainHealthColors[i]);
                         h[i].color = villainHealthColors[i];
                     }
                 }
@@ -256,6 +295,20 @@ public class CardDisplay : MonoBehaviour
         foreach (TextMeshProUGUI healthText in healthTextList)
         {
             healthText.text = card.health.ToString();
+        }
+    }
+    public void SetPlayerandEnemyPositions()
+    {
+        if (!hasAuthority)
+        {
+            foreach (List<GameObject> l in repositionLists)
+            {
+                for (int i = 0; i < l.Count; i++)
+                {
+                    l[i].transform.localPosition = new Vector3(l[i].transform.localPosition.x, -l[i].transform.localPosition.y, l[i].transform.localPosition.z);
+                }
+                
+            }
         }
     }
 

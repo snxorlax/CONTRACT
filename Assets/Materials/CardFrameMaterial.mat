@@ -137,7 +137,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - ClipThreshold: 0.48
-    - DissolveAmount: -0.4
+    - DissolveAmount: -0.06
     - DissolveWidth: 0.51
     - Vector1_4c0e7e78ad7c4ee88a76deff3e05d456: 0.0001
     - Vector1_e58c42f2c20c4f34afe3f0b3b724c7a0: -0.47

@@ -15,7 +15,7 @@ public class AnimateCard : NetworkBehaviour
     public Transform handFront, back, fieldFront;
     public Transform mainBoard;
     //Prefab for destroying and creating
-    public GameObject cardDestroy;
+    public GameObject destructionFX;
     //Material for instantiating different dissolving art
     public PlayerManager playerManager;
     public GameManager gameManager;
@@ -167,8 +167,12 @@ public class AnimateCard : NetworkBehaviour
     //Destroys card, currently in 2 parts
     public void StartDestroyCard()
     {
+        destructionFX.transform.Find("TopLeft").Find("Unit").gameObject.SetActive(true);
+        destructionFX.transform.Find("BottomRight").Find("Unit").gameObject.SetActive(true);
+        fieldFront.gameObject.SetActive(false);
+        destructionFX.GetComponent<Animator>().Play("Base Layer.CardDestroyAnimation", -1, 0);
     }
-    public IEnumerator AnimateDestroyCard()
+    public IEnumerator CompleteDestroyCard()
     {
         while (false)
         {

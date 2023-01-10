@@ -42,8 +42,8 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         canvas = GameObject.Find("MainCanvas").GetComponent<Canvas>();
         handZone = GameObject.Find("PlayerHandArea").gameObject;
         enemyField = GameObject.Find("EnemyField").gameObject;
-        playerAvatar = gameManager.player;
-        enemyAvatar = gameManager.enemy;
+        playerAvatar = gameManager.playerAvatar;
+        enemyAvatar = gameManager.enemyAvatar;
         playerField = GameObject.Find("PlayerField").gameObject;
         playerUtility = GameObject.Find("PlayerUtility").gameObject;
         playerDiscard = GameObject.Find("PlayerDiscard").gameObject;

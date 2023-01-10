@@ -11,7 +11,7 @@ public class TrespassEffect : CardEffect
     {
         base.Play();
         gameMessage = "Deal " + (player.blade + 1).ToString() + " damage.";
-        gameManager.Damage(gameManager.player, 2);
+        gameManager.Damage(gameManager.playerAvatar, 2);
         foreach (Transform t in enemyField.transform)
         {
 
@@ -19,6 +19,7 @@ public class TrespassEffect : CardEffect
                     t.GetComponent<CardBehaviour>().effectSelectable = true;
         }
         enemyAvatar.GetComponent<PlayerAvatarBehaviour>().effectSelectable = true;
+        
         player.gameText.GetComponent<TextMeshProUGUI>().enabled = true;
         player.gameText.GetComponent<TextMeshProUGUI>().text = gameMessage;
         gameManager.DisableZone(gameManager.playerManager.playerHandArea);

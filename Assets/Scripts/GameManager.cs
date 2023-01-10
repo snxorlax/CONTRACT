@@ -23,7 +23,7 @@ public class GameManager : NetworkBehaviour
     public PlayerManager currentTurn;
     public NetworkManager NetworkManager;
     public GameObject mainCanvas;
-    public GameObject player, enemy;
+    public GameObject playerAvatar, enemyAvatar;
     public GameObject animHelper;
     public Animator helpAnimator;
     
@@ -78,6 +78,7 @@ public class GameManager : NetworkBehaviour
                 if (!p.isLocalPlayer)
                 {
                     playerManager.enemyManager = p;
+                    p.enemyManager = playerManager;
                 }
             }
         }
@@ -263,9 +264,9 @@ public class GameManager : NetworkBehaviour
             }
             else if (target.GetComponent<NetworkIdentity>().hasAuthority)
             {
-                player.GetComponent<PlayerDisplay>().playerInfo.lifeTotal -= amount;
-                AnimateStats(player, "-" + amount);
-                player.GetComponent<PlayerDisplay>().SetPlayerProperties();
+                playerAvatar.GetComponent<PlayerDisplay>().playerInfo.lifeTotal -= amount;
+                AnimateStats(playerAvatar, "-" + amount);
+                playerAvatar.GetComponent<PlayerDisplay>().SetPlayerProperties();
             }
         }
     }

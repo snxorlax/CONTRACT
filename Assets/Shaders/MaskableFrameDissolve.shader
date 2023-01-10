@@ -2,7 +2,7 @@ Shader "MaskableFrameDissolve"
 {
     Properties
     {
-        MainColor("Color", Color) = (0.09433961, 0.08054467, 0.08054467, 1)
+        MainColor("MainColor", Color) = (0.09433961, 0.08054467, 0.08054467, 1)
         DissolveAmount("DissolveAmount", Float) = 0.43
         DissolveColor("DissolveColor", Color) = (0.8207547, 0.3368192, 0.3368192, 1)
         DissolveWidth("DissolveWidth", Float) = 0.51
