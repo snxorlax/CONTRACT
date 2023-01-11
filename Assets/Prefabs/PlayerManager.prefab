@@ -87,8 +87,8 @@ MonoBehaviour:
   enemyDeckCount: {fileID: 0}
   deckIndicator: {fileID: 0}
   enemyDeckIndicator: {fileID: 0}
-  Player: {fileID: 2992293848277318176, guid: a8f34a27bcead0f4d9527d91fd5b1a1b, type: 3}
-  Enemy: {fileID: 0}
+  playerAvatar: {fileID: 2992293848277318176, guid: a8f34a27bcead0f4d9527d91fd5b1a1b, type: 3}
+  enemyAvatar: {fileID: 0}
   playerHandArea: {fileID: 0}
   playerDiscardArea: {fileID: 0}
   enemyHandArea: {fileID: 0}

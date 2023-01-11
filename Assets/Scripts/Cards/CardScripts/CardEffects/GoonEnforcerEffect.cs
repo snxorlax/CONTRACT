@@ -12,7 +12,7 @@ public class GoonEnforcerEffect : CardEffect
     {
         base.Continuous();
         currentTypes.Clear();
-        foreach (GameObject g in player.playerField)
+        foreach (GameObject g in player.field)
         {
             currentTypes.Add(g.GetComponent<CardDisplay>().card.cardType);
             Debug.Log(g.GetComponent<CardDisplay>().card.cardType);

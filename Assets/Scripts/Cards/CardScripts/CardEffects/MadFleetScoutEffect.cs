@@ -8,7 +8,7 @@ public class MadFleetScoutEffect : CardEffect
     public bool empowered;
     public override void Continuous()
     {
-        if (player.playerField.Count > 4 && !empowered)
+        if (player.field.Count > 4 && !empowered)
         {
 
             gameManager.ChangeStats(self, 2, 1);
@@ -17,7 +17,7 @@ public class MadFleetScoutEffect : CardEffect
             self.GetComponent<CardBehaviour>().SetCard();
             empowered = true;
         }
-        if (player.playerField.Count < 5 && empowered)
+        if (player.field.Count < 5 && empowered)
         {
             gameManager.ChangeStats(self, -2, -1);
             self.GetComponent<CardDisplay>().card.originalAttack -= 2;

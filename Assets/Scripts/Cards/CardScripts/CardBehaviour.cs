@@ -15,7 +15,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
     //GameObjects associated with localPlayer
     public GameObject player, handZone, playerField, enemyField, playerAvatar, enemyAvatar, playerUtility, playerDiscard, mainBoard;
     //Indicator associated with this object
-    public GameObject indicator, cardEffect, hoverCard;
+    public GameObject handIndicator, unitFieldIndicator, relicFieldIndicator, cardEffect, hoverCard;
     //GameManager associated with this card's localPlayer
     public GameManager gameManager;
     //PlayerManager associated with this card's localPlayer
@@ -104,13 +104,13 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         if (Input.GetMouseButtonDown(0) && contractSelectable && card.cardType == Card.CardType.Henchman && hover)
         {
             playerManager.UpdateSelectedUnits(gameObject, true);
-            indicator.GetComponent<Image>().enabled = false;
+            unitFieldIndicator.GetComponent<Image>().enabled = false;
         }
         //select relic for contract
         else if (Input.GetMouseButtonDown(0) && contractSelectable && card.cardType == Card.CardType.Relic && hover)
         {
             playerManager.UpdateSelectedRelics(gameObject, true);
-            indicator.GetComponent<Image>().enabled = false;
+            relicFieldIndicator.GetComponent<Image>().enabled = false;
 
         }
         //RightClick to cancel selection
@@ -137,7 +137,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
         //targeted by effect
         if (Input.GetMouseButtonDown(0) && effectSelectable && hover)
         {
-            indicator.GetComponent<Image>().enabled = false;
+            unitFieldIndicator.GetComponent<Image>().enabled = false;
             if (playerManager.currentEffect.Count > 0)
             {
                 ActivateEffect(playerManager.currentEffect[0]);
@@ -305,7 +305,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                     playerManager.PlayCard(gameObject, false);
                 }
             }
-            playerDisplay.DisplayHorizontal(playerManager.playerHand, Display.handOffset);
+            playerDisplay.DisplayHorizontal(playerManager.hand, Display.handOffset);
             transform.localScale = originalScale;
             if (playerManager.currentEffect.Count == 0)
             {
@@ -379,7 +379,7 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
                 transform.localScale *= 1.85f;
                 transform.localPosition = new Vector2(transform.localPosition.x, 83);
                 transform.SetAsLastSibling();
-                playerDisplay.FanHand(playerManager.playerHand, gameObject);
+                playerDisplay.FanHand(playerManager.hand, gameObject);
             }
             else if (card.currentZone == "Discard" && !isDragging)
             {
@@ -407,8 +407,8 @@ public class CardBehaviour : NetworkBehaviour, IDragHandler, IBeginDragHandler, 
             transform.localPosition = new Vector2(transform.localPosition.x, 0);
             handZone.transform.position = originalHandPos;
             handZone.transform.localScale = originalHandScale;
-            playerDisplay.ResetRotations(playerManager.playerHand);
-            playerDisplay.DisplayHorizontal(playerManager.playerHand, Display.handOffset);
+            playerDisplay.ResetRotations(playerManager.hand);
+            playerDisplay.DisplayHorizontal(playerManager.hand, Display.handOffset);
         }
         if (card.currentZone == "Discard")
         {

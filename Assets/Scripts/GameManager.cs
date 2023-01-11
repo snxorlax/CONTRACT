@@ -44,8 +44,6 @@ public class GameManager : NetworkBehaviour
     private void Start()
     {
         mainCanvas = GameObject.Find("MainCanvas");
-        // player = GameObject.Find("PlayerAvatar");
-        // enemy = GameObject.Find("EnemyAvatar");
         NetworkIdentity networkIdentity = NetworkClient.connection.identity;
         playerManager = networkIdentity.GetComponent<PlayerManager>();
         animHelper = GameObject.Find("AnimHelper");
@@ -55,7 +53,6 @@ public class GameManager : NetworkBehaviour
         GraveyardUpdate.AddListener(UpdatePoison);
         //Coroutine is always on, can be triggered to loop through Action Queue
         StartCoroutine(PlayActionQueue());
-        
     }
     //Coroutine for looping through Action Queue
     public IEnumerator PlayActionQueue()
@@ -77,8 +74,8 @@ public class GameManager : NetworkBehaviour
             {
                 if (!p.isLocalPlayer)
                 {
-                    playerManager.enemyManager = p;
-                    p.enemyManager = playerManager;
+                    playerManager.enemy = p;
+                    p.enemy = playerManager;
                 }
             }
         }
@@ -248,7 +245,7 @@ public class GameManager : NetworkBehaviour
             {
                 target.GetComponent<CardDisplay>().card.cardEffect.Shroud();
             }
-            if (target.GetComponent<CardDisplay>().card.health <= 0)
+            if (target.GetComponent<CardDisplay>().card.health <= 0 && playerManager.isLocalPlayer)
             {
                 playerManager.DestroyCard(target);
             }
@@ -350,7 +347,6 @@ public class GameManager : NetworkBehaviour
         cardInfo = card.GetComponent<CardDisplay>().card;
         card.GetComponent<CardDisplay>().card.attack = cardInfo.originalAttack;
         card.GetComponent<CardDisplay>().card.health = cardInfo.originalHealth;
-        card.transform.Find("Front").GetChild(3).gameObject.SetActive(true);
     }
 
     public void DisableZone(GameObject zone)
@@ -368,7 +364,7 @@ public class GameManager : NetworkBehaviour
         }
     }
     //Calculates poison (Poison = the number of unique card types in your graveyard)
-    public int CaluculatePoison(PlayerManager poisonSource)
+    public int CalculatePoison(PlayerManager poisonSource)
     {
         //Reset poison each time it is calculated in order to avoid counting old data
         int poison = 0;
@@ -378,11 +374,11 @@ public class GameManager : NetworkBehaviour
         //Calculate from the correct list depending on authority
         if (poisonSource.hasAuthority)
         {
-            poisonDiscard = poisonSource.playerDiscard;
+            poisonDiscard = poisonSource.discard;
         }
         else if (!poisonSource.hasAuthority)
         {
-            poisonDiscard = poisonSource.enemyDiscard;
+            poisonDiscard = poisonSource.enemy.discard;
         }
         foreach (GameObject card in poisonDiscard)
         {
@@ -410,25 +406,14 @@ public class GameManager : NetworkBehaviour
         //Updates poison for each player
         foreach(PlayerManager p in players)
         {
-            //checks the playerfield of localPlayer and enemy
-            foreach (GameObject g in p.playerField)
+            //checks the field of localPlayer and enemy
+            foreach (GameObject g in p.field)
             {
                 Card card = g.GetComponent<CardDisplay>().card;
                 if (card.poisoned)
                 {
                     //poisonSource defined at the time a unit is poisoned
-                    int currentPoison = CaluculatePoison(card.poisonSource);
-                    card.attack = card.originalAttack - currentPoison;
-                    g.GetComponent<CardDisplay>().SetStats();
-                }
-            }
-            //checks the enemyField of localPlayer and enemy
-            foreach (GameObject g in p.enemyField)
-            {
-                Card card = g.GetComponent<CardDisplay>().card;
-                if (card.poisoned)
-                {
-                    int currentPoison = CaluculatePoison(card.poisonSource);
+                    int currentPoison = CalculatePoison(card.poisonSource);
                     card.attack = card.originalAttack - currentPoison;
                     g.GetComponent<CardDisplay>().SetStats();
                 }

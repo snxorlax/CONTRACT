@@ -158,6 +158,7 @@ public class CardDisplay : NetworkBehaviour
             //add relevant gameobjects to repositionlist to be positioned at runtime based on authority
             repositionLists.Add(destroyReposition);
         }
+        SetPlayerandEnemyPositions();
 
     }
     //Main function to set art, colors, stats, text and effects for each applicable view of card
@@ -168,7 +169,6 @@ public class CardDisplay : NetworkBehaviour
             SetArt();
             SetColors();
             SetStats();
-            SetPlayerandEnemyPositions();
             SetText();
             SetCardEffects();
             cardBehaviour.SetCard();

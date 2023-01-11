@@ -14,9 +14,8 @@ public class TrespassEffect : CardEffect
         gameManager.Damage(gameManager.playerAvatar, 2);
         foreach (Transform t in enemyField.transform)
         {
-
-                    t.Find("Indicator").GetComponent<Image>().enabled = true;
-                    t.GetComponent<CardBehaviour>().effectSelectable = true;
+            t.GetComponent<CardBehaviour>().unitFieldIndicator.SetActive(true);
+            t.GetComponent<CardBehaviour>().effectSelectable = true;
         }
         enemyAvatar.GetComponent<PlayerAvatarBehaviour>().effectSelectable = true;
         
@@ -36,9 +35,8 @@ public class TrespassEffect : CardEffect
         // target.transform.Find("VFX").Find("Blade").GetComponent<ParticleSystem>().Play(true);
         foreach (Transform t in enemyField.transform)
         {
-
-                    t.Find("Indicator").GetComponent<Image>().enabled = false;
-                    t.GetComponent<CardBehaviour>().effectSelectable = false;
+            t.GetComponent<CardBehaviour>().unitFieldIndicator.SetActive(false);
+            t.GetComponent<CardBehaviour>().effectSelectable = false;
         }
         enemyAvatar.GetComponent<PlayerAvatarBehaviour>().effectSelectable = false;
         gameManager.EnableZone(gameManager.playerManager.playerHandArea);

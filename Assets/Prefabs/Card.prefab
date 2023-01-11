@@ -2236,7 +2236,7 @@ MonoBehaviour:
   - {r: 0.43529415, g: 0.38431376, b: 0.29411766, a: 1}
   - {r: 0.2627451, g: 0.19607845, b: 0.050980397, a: 1}
   henchmanHealthColors:
-  - {r: 0, g: 0, b: 0, a: 0}
+  - {r: 0, g: 0, b: 0, a: 1}
   - {r: 0.08627451, g: 0.08627451, b: 0.08627451, a: 1}
   - {r: 0.30980393, g: 0.30980393, b: 0.30980393, a: 1}
   - {r: 0.08627451, g: 0.08627451, b: 0.08627451, a: 1}
@@ -2274,7 +2274,9 @@ MonoBehaviour:
   playerUtility: {fileID: 0}
   playerDiscard: {fileID: 0}
   mainBoard: {fileID: 0}
-  indicator: {fileID: 2185364490234054282}
+  handIndicator: {fileID: 2185364490234054282}
+  unitFieldIndicator: {fileID: 5114570517076147200}
+  relicFieldIndicator: {fileID: 5114570517367682052}
   cardEffect: {fileID: 0}
   hoverCard: {fileID: 0}
   gameManager: {fileID: 0}
@@ -2673,7 +2675,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &2185364490234054281
 RectTransform:
   m_ObjectHideFlags: 0
@@ -2708,14 +2710,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2185364490234054282}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.7075472, g: 0.1618385, b: 0.09678713, a: 0.6039216}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:
@@ -4996,7 +4998,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &5114570517076147201
 RectTransform:
   m_ObjectHideFlags: 0
@@ -5031,14 +5033,14 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 5114570517076147200}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
   m_Color: {r: 0.38042897, g: 0.8093889, b: 0.9716981, a: 0.40392157}
-  m_RaycastTarget: 1
+  m_RaycastTarget: 0
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
   m_OnCullStateChanged:

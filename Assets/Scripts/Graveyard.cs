@@ -25,7 +25,7 @@ private void Start()
             if (Input.GetMouseButtonDown(0))
             {
                 playerDiscard = GameObject.Find("PlayerDiscard");
-                display.DisplayVertical(playerManager.playerDiscard, Display.discardOffset);
+                display.DisplayVertical(playerManager.discard, Display.discardOffset);
                 playerDiscard.transform.SetAsLastSibling();
             }
 

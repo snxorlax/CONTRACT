@@ -17,11 +17,13 @@ MonoBehaviour:
   artColor: {r: 0.39607844, g: 0.39607844, b: 0.39607844, a: 1}
   attack: 0
   originalAttack: 0
-  health: 4
-  originalHealth: 4
+  health: 1
+  originalHealth: 1
   bounty: 1
   currentZone: 
   shroud: 0
+  poisoned: 0
+  poisonSource: {fileID: 0}
   cardName: TOXIC SCAVENGER
   cardText: 'Deathwalk: Poison an enemy unit.'
   cardEffect: {fileID: 11400000, guid: 8708e29b0f3363f4db4b3c5d17cc885d, type: 2}

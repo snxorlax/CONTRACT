@@ -70,7 +70,7 @@ public class PlayerAvatarBehaviour : NetworkBehaviour, IDropHandler, IPointerEnt
     {
         foreach (PlayerManager p in gameManager.players)
         {
-            if (p.enemyField.Count > 0)
+            if (p.enemy.field.Count > 0)
             {
                 return;
             }
