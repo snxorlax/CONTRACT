@@ -7,6 +7,8 @@ using Mirror;
 public class AnimateCard : NetworkBehaviour
 {
     public Card card;
+    //card Display associated with card
+    public CardDisplay cardDisplay;
     // Helper object for animations
     public Transform animHelper;
     // Animator used by animHelper
@@ -22,6 +24,8 @@ public class AnimateCard : NetworkBehaviour
     
     public AnimationClip drawClipPlayer, drawClipEnemy, playClipEnemy;
     public Canvas canvas;
+    //list of lists to iterate through for dissolve effect
+    public List<Image> unitDestroyFrameLists, unitDestroyArtLists;
 
     private void Awake()
     {
@@ -38,6 +42,19 @@ public class AnimateCard : NetworkBehaviour
     {
         playerManager = NetworkClient.connection.identity.GetComponent<PlayerManager>();
         gameManager = playerManager.gameManager;
+
+        unitDestroyFrameLists.AddRange(cardDisplay.unitDestroyImagesBR);
+        unitDestroyFrameLists.AddRange(cardDisplay.unitDestroyImagesTL);
+        unitDestroyFrameLists.AddRange(cardDisplay.attackDestroyImagesBR);
+        unitDestroyFrameLists.AddRange(cardDisplay.attackDestroyImagesTL);
+        unitDestroyFrameLists.AddRange(cardDisplay.healthDestroyImagesBR);
+        unitDestroyFrameLists.AddRange(cardDisplay.healthDestroyImagesTL);
+        unitDestroyFrameLists.Add(cardDisplay.fieldDestroyBackgroundTL);
+        unitDestroyFrameLists.Add(cardDisplay.fieldDestroyBackgroundBR);
+
+        unitDestroyArtLists.Add(cardDisplay.fieldDestroyUnitArtBR);
+        unitDestroyArtLists.Add(cardDisplay.fieldDestroyUnitArtTL);
+
     }
 
 
@@ -164,21 +181,45 @@ public class AnimateCard : NetworkBehaviour
         CompleteAction();
     }
 
-    //Destroys card, currently in 2 parts
+    //Destroys card, currently in 3 parts
     public void StartDestroyCard()
     {
         destructionFX.transform.Find("TopLeft").Find("Unit").gameObject.SetActive(true);
         destructionFX.transform.Find("BottomRight").Find("Unit").gameObject.SetActive(true);
         fieldFront.gameObject.SetActive(false);
         destructionFX.GetComponent<Animator>().Play("Base Layer.CardDestroyAnimation", -1, 0);
+        // StartCoroutine("CompleteDestroyCard");
     }
-    public IEnumerator CompleteDestroyCard()
+    public void CompleteDestroyCard(){
+        Debug.Log("CompleteDestroyTest");
+        StartCoroutine("CompleteDestroyCardAnimation");
+    }
+    public IEnumerator CompleteDestroyCardAnimation()
     {
-        while (false)
+        float counter = 0;
+        while (counter <= 1)
         {
+            foreach (Image frameImage in unitDestroyFrameLists)
+            {
+                frameImage.materialForRendering.SetFloat("DissolveAmount", counter);
+            }
+            foreach (Image artImage in unitDestroyArtLists)
+            {
+                artImage.materialForRendering.SetFloat("DissolveAmount", counter);
+            }
+            counter += .002f;
             yield return null;
         }
         gameManager.ResetStats(gameObject);
+        if (hasAuthority)
+        {
+            transform.SetParent(playerManager.playerDiscardArea.transform, false);
+        }
+        else
+        {
+            transform.SetParent(playerManager.enemyDiscardArea.transform, false);
+        }
+        playerManager.destroyQueue.Remove(gameObject);
     }
     public void StartAttack(GameObject attacker, GameObject defender)
     {

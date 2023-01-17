@@ -66,10 +66,12 @@ public class CardDisplay : NetworkBehaviour
     [Header("FieldDestroy, Unit, TL")]
     public Image fieldDestroyUnitArtTL;
     public Image fieldDestroyFrameOuterTL, fieldDestroyFrameMainTL, fieldDestroyFrameInnerTL, fieldDestroyFrameShadowTL;
+    public Image fieldDestroyBackgroundTL;
     public TextMeshProUGUI destroyAttackTextTL, destroyHealthTextTL;
     [Header("FieldDestroy, Unit, BR")]
     public Image fieldDestroyUnitArtBR;
     public Image fieldDestroyFrameOuterBR, fieldDestroyFrameMainBR, fieldDestroyFrameInnerBR, fieldDestroyFrameShadowBR;
+    public Image fieldDestroyBackgroundBR;
     public TextMeshProUGUI destroyAttackTextBR, destroyHealthTextBR;
     [Header("FieldDestroy, Relic, TL")]
     public Image fieldDestroyRelicArtTL;
@@ -157,9 +159,15 @@ public class CardDisplay : NetworkBehaviour
             healthTextList.Add(destroyHealthTextBR);
             //add relevant gameobjects to repositionlist to be positioned at runtime based on authority
             repositionLists.Add(destroyReposition);
+            
+            fieldDestroyBackgroundTL.material.SetColor("Main Texture", villainHealthColors[0]);
+            fieldDestroyBackgroundBR.material.SetColor("Main Texture", villainHealthColors[0]);
         }
-        SetPlayerandEnemyPositions();
 
+    }
+    //Important to call once the object is SPAWNED, to ensure that authority check is relevant
+    public override void OnStartClient(){
+        SetPlayerandEnemyPositions();
     }
     //Main function to set art, colors, stats, text and effects for each applicable view of card
     public void SetCardProperties()
@@ -299,6 +307,7 @@ public class CardDisplay : NetworkBehaviour
     }
     public void SetPlayerandEnemyPositions()
     {
+        Debug.Log(hasAuthority);
         if (!hasAuthority)
         {
             foreach (List<GameObject> l in repositionLists)

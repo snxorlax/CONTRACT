@@ -502,13 +502,17 @@ public class PlayerManager : NetworkBehaviour
             card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
             if (card.GetComponent<NetworkIdentity>().hasAuthority)
             {
-                card.transform.SetParent(playerDiscardArea.transform, false);
-                discard.Add(card);
+                if (!discard.Contains(card))
+                {
+                    discard.Add(card);
+                }
             }
             else
             {
-                card.transform.SetParent(enemyDiscardArea.transform, false);
-                enemy.discard.Add(card);
+                if (!enemy.discard.Contains(card))
+                {
+                    enemy.discard.Add(card);
+                }
             }
             if (field.Contains(card))
             {
@@ -530,12 +534,11 @@ public class PlayerManager : NetworkBehaviour
                 enemy.utility.Remove(card);
                 this.GetComponent<Display>().DisplayHorizontal(enemy.utility, Display.fieldOffset);
             }
-            this.GetComponent<Display>().DisplayVertical(discard, Display.discardOffset);
-            this.GetComponent<Display>().DisplayHorizontal(field, Display.fieldOffset);
-            this.GetComponent<Display>().DisplayHorizontal(utility, Display.fieldOffset);
+            // this.GetComponent<Display>().DisplayVertical(discard, Display.discardOffset);
+            // this.GetComponent<Display>().DisplayHorizontal(field, Display.fieldOffset);
+            // this.GetComponent<Display>().DisplayHorizontal(utility, Display.fieldOffset);
 
         }
-        // destroyQueue.Clear();
         gameManager.GraveyardUpdate?.Invoke();
         // Waits until destroyQueue is empty before completing coroutine
         while (destroyQueue.Count > 0)
@@ -556,13 +559,17 @@ public class PlayerManager : NetworkBehaviour
             Debug.Log(card.GetComponent<NetworkIdentity>().hasAuthority);
             if (card.GetComponent<NetworkIdentity>().hasAuthority)
             {
-                card.transform.SetParent(playerDiscardArea.transform, false);
-                enemy.discard.Add(card);
+                if (!enemy.discard.Contains(card))
+                {
+                    enemy.discard.Add(card);
+                }
             }
             else
             {
-                card.transform.SetParent(enemyDiscardArea.transform, false);
-                discard.Add(card);
+                if (!discard.Contains(card))
+                {
+                    discard.Add(card);
+                }
             }
             if (field.Contains(card))
             {
@@ -579,7 +586,6 @@ public class PlayerManager : NetworkBehaviour
             if (enemy.field.Contains(card))
             {
                 card.GetComponent<CardBehaviour>().card.currentZone = "Discard";
-                card.transform.SetParent(enemyDiscardArea.transform, false);
                 enemy.field.Remove(card);
                 this.GetComponent<Display>().DisplayHorizontal(enemy.field, Display.fieldOffset);
                 this.GetComponent<Display>().DisplayHorizontal(enemy.discard, Display.fieldOffset);
@@ -599,7 +605,6 @@ public class PlayerManager : NetworkBehaviour
             this.GetComponent<Display>().DisplayHorizontal(enemy.discard, Display.fieldOffset);
 
         }
-        destroyQueue.Clear();
         gameManager.GraveyardUpdate?.Invoke();
         // Waits until action is complete and the Gamemanager's actionComplete bool is true;
         while (destroyQueue.Count > 0)

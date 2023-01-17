@@ -137,7 +137,7 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Floats:
     - ClipThreshold: 0.48
-    - DissolveAmount: -0.06
+    - DissolveAmount: 0
     - DissolveWidth: 0.51
     - Vector1_4c0e7e78ad7c4ee88a76deff3e05d456: 0.0001
     - Vector1_e58c42f2c20c4f34afe3f0b3b724c7a0: -0.47
@@ -262,7 +262,7 @@ Material:
     - Color_3df0c303892b41958fd58b9d3dc712bc: {r: 0.5377358, g: 0.23082057, b: 0.23082057, a: 1}
     - Color_ba9ca6e9b6584cb09674ac3ad0bd1f0d: {r: 0.39607847, g: 0.2901961, b: 0.003921569, a: 1}
     - DissolveColor: {r: 0.8207547, g: 0.33681917, b: 0.33681917, a: 1}
-    - MainColor: {r: 0.6, g: 0.45098042, b: 0.2392157, a: 1}
+    - MainColor: {r: 0, g: 0, b: 0, a: 1}
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _BaseColorMap_MipInfo: {r: 0, g: 0, b: 0, a: 0}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
